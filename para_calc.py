@@ -1,0 +1,129 @@
+
+# To calculate the destination parameter
+def destpara(microop):
+    destset = []
+    
+    if  microop.split()[1] == "mov_i32" or \
+        microop.split()[1] == "movi_i32" or \
+        microop.split()[1] == "movi_i64" or \
+        \
+        microop.split()[1] == "qemu_ld32" or \
+        microop.split()[1] == "add_i32" or \
+        \
+        microop.split()[1] == "sub_i32" or \
+        microop.split()[1] == "mul_i32" or \
+        microop.split()[1] == "mul_i64" or \
+        microop.split()[1] == "div_i32" or \
+        \
+        microop.split()[1] == "qemu_ld8u" or \
+        microop.split()[1] == "qemu_ld8s" or \
+        microop.split()[1] == "qemu_ld16u" or \
+        microop.split()[1] == "qemu_ld16s" or \
+        microop.split()[1] == "qemu_ld32u" or \
+        microop.split()[1] == "qemu_ld32s" or \
+        microop.split()[1] == "qemu_ld64" or \
+        \
+        microop.split()[1] == "neg_i32" or \
+        microop.split()[1] == "and_i32" or \
+        microop.split()[1] == "or_i32" or \
+        microop.split()[1] == "xor_i32" or \
+        microop.split()[1] == "not_i32" or \
+        microop.split()[1] == "shl_i32" or \
+        microop.split()[1] == "shr_i32" or \
+        microop.split()[1] == "sar_i32" or \
+        microop.split()[1] == "rotl_i32" or \
+        microop.split()[1] == "rotr_i32" :
+       
+        destset.append( microop.split()[2].split(',')[0] )
+    
+    
+    elif microop.split()[1] == "qemu_st8" or \
+        microop.split()[1] == "qemu_st16" or \
+        microop.split()[1] == "qemu_st32" or \
+        microop.split()[1] == "qemu_st64" :
+        
+        destset.append( microop.split()[2].split(',')[1] )
+    
+    elif microop.split()[1] == "bswap32_i32" or \
+        \
+        microop.split()[1] == "ext8s_i32" or \
+        microop.split()[1] == "ext8s_i32" or \
+        microop.split()[1] == "ext16s_i32" or \
+        microop.split()[1] == "ext16u_i32" or \
+        microop.split()[1] == "ext32s_i64" or \
+        microop.split()[1] == "ext32u_i64" :
+        
+        destset.append( microop.split()[2].split(',')[0] )
+        destset.append( microop.split()[2].split(',')[1] )
+    
+    else:
+        destset.append("$Unknown_dest_para")
+        
+    return destset
+    
+    
+
+# To calculate the source parameter
+def srcpara(microop):
+    srcset = []
+    
+    if  microop.split()[1] == "mov_i32" or \
+        microop.split()[1] == "movi_i32" or \
+        microop.split()[1] == "movi_i64" or \
+        \
+        microop.split()[1] == "neg_i32" or \
+        \
+        microop.split()[1] == "qemu_ld32" or \
+        microop.split()[1] == "qemu_ld8u" or \
+        microop.split()[1] == "qemu_ld8s" or \
+        microop.split()[1] == "qemu_ld16u" or \
+        microop.split()[1] == "qemu_ld16s" or \
+        microop.split()[1] == "qemu_ld32u" or \
+        microop.split()[1] == "qemu_ld32s" or \
+        microop.split()[1] == "qemu_ld64" :
+        
+        srcset.append( microop.split()[2].split(',')[1] )
+        
+    elif microop.split()[1] == "qemu_st8" or \
+        microop.split()[1] == "qemu_st16" or \
+        microop.split()[1] == "qemu_st32" or \
+        microop.split()[1] == "qemu_st64" :
+        
+        srcset.append( microop.split()[2].split(',')[0] )
+        
+    elif microop.split()[1] == "add_i32" or \
+        \
+        microop.split()[1] == "sub_i32" or \
+        microop.split()[1] == "mul_i32" or \
+        microop.split()[1] == "mul_i64" or \
+        microop.split()[1] == "div_i32" or \
+        \
+        microop.split()[1] == "and_i32" or \
+        microop.split()[1] == "or_i32" or \
+        microop.split()[1] == "xor_i32" or \
+        microop.split()[1] == "not_i32" or \
+        microop.split()[1] == "shl_i32" or \
+        microop.split()[1] == "shr_i32" or \
+        microop.split()[1] == "sar_i32" or \
+        microop.split()[1] == "rotl_i32" or \
+        microop.split()[1] == "rotr_i32" :
+        
+        srcset.append( microop.split()[2].split(',')[1] )
+        srcset.append( microop.split()[2].split(',')[2] )
+        
+    elif microop.split()[1] == "bswap32_i32" or \
+        \
+        microop.split()[1] == "ext8s_i32" or \
+        microop.split()[1] == "ext8s_i32" or \
+        microop.split()[1] == "ext16s_i32" or \
+        microop.split()[1] == "ext16u_i32" or \
+        microop.split()[1] == "ext32s_i64" or \
+        microop.split()[1] == "ext32u_i64" :
+        
+        srcset.append( microop.split()[2].split(',')[0] )
+        srcset.append( microop.split()[2].split(',')[1] )
+        
+    else:
+        srcset.append("$Unknown_dest_para")
+        
+    return srcset
