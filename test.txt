@@ -1,0 +1,19 @@
+Trace 0x44348dd0 [bf814768] 
+& EAX=00002000 EBX=e1577c08 ECX=00000010 EDX=e1477dd8 ESI=e142f430 EDI=e147e9f8 EBP=f86a4b54 ESP=f86a4b3c EIP=bf814772 EFL=00000246 [---Z-P-] CR3=0ea97000 CPL=0 II=0 A20=1 SMM=0 HLT=0
+& EAX=00002000 EBX=e1577c08 ECX=00000010 EDX=e1477dd8 ESP=f86a4b3c EBP=f86a4b54 ESI=e142f430 EDI=e147e9f8 CR3=0ea97000 EIP=bf814772
+IN: 
+0xbf814772:  cmpl   $0x0,0x14(%ebp)
+0xbf814776:  jne    0xbf8145df
+
+OP:
+ ---- 0xbf814772
+# mov_i32 tmp2,ebp
+# movi_i32 tmp12,$0x14
+# qemu_ld32 tmp0,tmp2,$0x0
+# add_i32 tmp2,tmp2,tmp12
+# movi_i32 tmp1,$0x0
+
+# qemu_st32 tmp0,tmp2,$0x1
+# mov_i32 cc_src,tmp1
+# mov_i32 eax,tmp2
+# sub_i32 cc_dst,tmp0,tmp1
