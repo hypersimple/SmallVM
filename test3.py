@@ -26,3 +26,22 @@ change(examplelist)
 print examplelist[0]
 
 print 3%4
+
+print "Trace 0x449810e0 [77f18a1e]\n".split()[2].split('[')[1].split(']')[0]
+
+aa= '00a4'
+print aa.lstrip('0')
+print aa
+
+for i in xrange(-1,2):
+    print i
+    
+    
+DataSource = "/home/cy/project/test4.txt"
+DataWarehouse = "/home/cy/qemu_all_op.log"
+#DataWarehouse = "/home/cy/project/test5.txt"
+DataDest = "/home/cy/project/test6.txt"
+
+f = open(DataSource, "r")
+text = f.readlines(1)  #Text is a string array
+print text

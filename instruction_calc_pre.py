@@ -3,13 +3,18 @@ import string
 import sys
 
 
+# XXX TODO: When do slicing, compare the number, not the string, 0x001 vs 0x1
 
-DataSource = "/home/cy/project/test.txt"
+#DataSource = "/home/cy/project/test.txt"
+#DataSource = "/home/cy/qemu12new.log"
+#DataSource = "/home/cy/project/qemu12_ready.log"
+DataSource = "/home/cy/project/qemu13_instr_calc2.log"
 
 f = open(DataSource, "r")
 text = f.readlines()  #Text is a string array
 
-DataDest = "/home/cy/project/parsed_test.txt"
+#DataDest = "/home/cy/project/qemu12_ready_parsed.log"
+DataDest = "/home/cy/project/qemu13_instr_calc3.log"
 
 f2 = open(DataDest, "w")
 
@@ -49,7 +54,7 @@ def init_get_reg_value(text,line,reg):
                 regi[9] = int(text[line-subline].split()[9].split('=')[1], 16)
                 return regi[9]
             else: 
-                return 'error'
+                return 'init_get_reg_value error'
 
 
 # If this is an old block, we use get_reg_value
@@ -107,7 +112,7 @@ def get_reg_value(text,line,reg):
         else:
             return init_get_reg_value(text,line,reg)
     else: 
-        return 'error'
+        return 'get_reg_value error'
 
 
 
@@ -120,17 +125,18 @@ cc_op = 0
 # Initialize the tmp array
 # The element is number!!!
 tmp = []
-for i in range(0,50):
+for i in xrange(0,50):
     tmp.append(3735928559)  # "deadbeef" in Hex
     
 # Initialize the CPU register array
 # The element is number!!!
 # NO regi[0] !!!
 regi = []
-for i in range(0,10):
+for i in xrange(0,10):
     regi.append(3735928559)  # "deadbeef" in Hex
     
 def tmpmap(tmp_string):
+    print tmp_string
     return int(tmp_string.split('tmp')[1])
     
 def regmap(reg):
@@ -153,7 +159,7 @@ def regmap(reg):
     elif reg == 'eip':
         return 9
     else:
-        return 'error'
+        return 'reg_map error'
 
 # microop is a statement like "# add_i32 tmp2,tmp2,tmp12"
 def instruction_calc_pre(text,line,microop):
@@ -167,7 +173,7 @@ def instruction_calc_pre(text,line,microop):
         src_str = microop.split()[2].split(',')[1]
         dst_str = microop.split()[2].split(',')[0]
         
-        if src_str.startswith('e'):
+        if src_str.startswith('e') and dst_str.startswith('tmp'):   # TODO: dst_str could be 'loc15'
             tmp[tmpmap(dst_str)] = get_reg_value(text,line,src_str)
         elif src_str.startswith('tmp'):
             if dst_str.startswith('e'):
@@ -179,7 +185,7 @@ def instruction_calc_pre(text,line,microop):
             elif dst_str == 'cc_op':
                 cc_op = tmp[tmpmap(src_str)]
         else:
-            print 'error'
+            print 'mov_i32 error'
     
     
     elif microop.split()[1] == "movi_i32" :
@@ -192,7 +198,7 @@ def instruction_calc_pre(text,line,microop):
         elif dst_str == 'cc_op':
             cc_op = int(src_str.split('x')[1],16)
         else:
-            print 'error'
+            print 'movi_i32 error'
             
     elif microop.split()[1] == "add_i32" :
 
@@ -200,13 +206,20 @@ def instruction_calc_pre(text,line,microop):
         src_str2 = microop.split()[2].split(',')[2]
         dst_str = microop.split()[2].split(',')[0]
 
-        tmp[tmpmap(dst_str)] = (tmp[tmpmap(src_str1)] + tmp[tmpmap(src_str2)]) % 4294967296
-        
+        if src_str1.startswith('e'):
+            tmp[tmpmap(dst_str)] = (regi[regmap(src_str1)] + tmp[tmpmap(src_str2)]) % 4294967296
+
+        elif src_str1.startswith('tmp') and dst_str.startswith('tmp'):
+            tmp[tmpmap(dst_str)] = (tmp[tmpmap(src_str1)] + tmp[tmpmap(src_str2)]) % 4294967296
+        #TODO: # add_i32 tmp8,cc_dst,cc_src
+        #TODO: # add_i32 cc_op,tmp6,tmp12
+
         
 def parse_text(text):
     line = 0
     global regi,tmp
     for line in xrange(0,len(text)):
+    
         if text[line].startswith('&') and text[line].endswith('HLT=0\n'):
                 regi[1] = int(text[line].split()[1].split('=')[1], 16)
                 regi[2] = int(text[line].split()[2].split('=')[1], 16)
@@ -220,17 +233,23 @@ def parse_text(text):
         elif text[line].startswith('#'):
             instruction_calc_pre(text,line,text[line])
                         
-            if text[line].split()[1] == "qemu_st32":
-                text[line] = '# qemu_st32 ' + text[line].split()[2].split(',')[0] \
-                + ','\
-                + str('*0x'+'%x'%tmp[tmpmap(text[line].split()[2].split(',')[1])])\
-                + ',' + text[line].split()[2].split(',')[2] + '\n'
-                
-            elif text[line].split()[1] == "qemu_ld32":
-                text[line] = '# qemu_ld32 ' + text[line].split()[2].split(',')[0] \
-                + ','\
-                + str('*0x'+'%x'%tmp[tmpmap(text[line].split()[2].split(',')[1])])\
-                + ',' + text[line].split()[2].split(',')[2] + '\n'
+            if text[line].split()[1] == "qemu_st32":    # TODO: loc17 not all tmp
+                str1 = text[line].split()[2].split(',')[0]
+                str2 = text[line].split()[2].split(',')[1]
+                if str1.startswith('tmp') and str2.startswith('tmp'):
+                    text[line] = '# qemu_st32 ' + text[line].split()[2].split(',')[0] \
+                    + ','\
+                    + str('*0x'+'%x'%tmp[tmpmap(text[line].split()[2].split(',')[1])])\
+                    + ',' + text[line].split()[2].split(',')[2] + '\n'
+                    
+            elif text[line].split()[1] == "qemu_ld32":   # TODO: loc17 not all tmp
+                str1 = text[line].split()[2].split(',')[0]
+                str2 = text[line].split()[2].split(',')[1]
+                if str1.startswith('tmp') and str2.startswith('tmp'):
+                    text[line] = '# qemu_ld32 ' + text[line].split()[2].split(',')[0] \
+                    + ','\
+                    + str('*0x'+'%x'%tmp[tmpmap(text[line].split()[2].split(',')[1])])\
+                    + ',' + text[line].split()[2].split(',')[2] + '\n'
 
 # XXX NOTE: the tmp[i] could not be assigned, because some instructions are not executed
 

@@ -1,4 +1,5 @@
 
+#XXX: The return value is NOT a set
 # To calculate the destination parameter
 def destpara(microop):
     destset = []

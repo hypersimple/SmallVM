@@ -5,20 +5,6 @@ import re
 
 
 
-# target is the target string that would be the start of backward slicing
-def slicing(target):
-    global text
-    global slice_set
-    global instruction_set
-    line = 0
-    subline = 0
-    
-    if text[line].find(target) != -1:
-        if target.split(' ')[1]
-    
-
-
-
 DataSource = "/home/cy/qemu12.log"
 
 f = open(DataSource, "r")
