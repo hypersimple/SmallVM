@@ -7,8 +7,7 @@ def slicing(instr_line, microop,slice_set,instruction_list):
         #print 1
         slice_set = slice_set - set(destpara(microop))  #Minus of set
         slice_set = slice_set | set(srcpara(microop))   #Union of set
-        #instruction_list.append(str(instr_line)+' '+microop)
-        instruction_list.append(microop)
+        instruction_list.append(str(instr_line)+' '+microop)
         
         print str(instr_line)+' '+microop
         print slice_set
@@ -18,7 +17,7 @@ def slicing(instr_line, microop,slice_set,instruction_list):
 
 
 #DataSource = "/home/cy/project/parsed_test.txt"
-DataSource = "/home/cy/project/qemu15_instr_calc.log"
+DataSource = "/home/cy/project/qemu15_instr_calc3.log"
 
 f = open(DataSource, "r")
 text = f.readlines()  #Text is a string array
@@ -35,18 +34,13 @@ slice_set = set(init_list)
 
 #line = 310653 - 1
 #line = 312408 - 1
-line = 806670 - 1        # Set the interested line; 0x7e43b6d6; the destination para
+line = 1896129 - 1        # Set the interested line; 0x7e43b6d6; the destination para
 for subline in xrange(0,line+1):
     if text[line-subline].startswith('#'):
-        (slice_set, instruction_list) = slicing(line-subline+1, text[line-subline], slice_set,instruction_list)
+        (slice_set, instruction_list) = slicing(line-subline+1, text[line-subline],slice_set,instruction_list)
         
 
-f2 = open ("/home/cy/project/slicing_result.txt", "w")
 
-for line in xrange(0,len(instruction_list)):
-    f2.write(instruction_list[len(instruction_list)-line-1])
-
-f2.close()
 
 #print slice_set
 #(slice_set, instruction_list) = slicing("# add_i32 tmp3,tmp2,tmp12",slice_set,instruction_list)

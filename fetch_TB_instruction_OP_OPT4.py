@@ -16,12 +16,12 @@ text = f.readlines()  #Text is a string array
 
 #f1 = open(DataWarehouse, "r")
 
-#f2 = open ("/home/cy/project/test8.txt", "w") 
+#f2 = open ("/home/cy/project/test8_2.txt", "w") 
 #f2 = open ("/home/cy/project/qemu12_processed_1_temp.log", "w")
 f2 = open ("/home/cy/project/qemu15_fetch.log", "w")
 
 
-def fetch(text,text1):
+def fetch(text,dict1):
     #text2 = []
     #line2 = 0
     # Seems should be from the second line, Done
@@ -34,13 +34,9 @@ def fetch(text,text1):
             address = text[line].split()[2].split('[')[1].split(']')[0]
             address = address.lstrip('0')
             #print '2 '+str(time.time())
-            result = re.findall('OP after liveness analysis:\n ---- 0x'+ address +'[\s\S]+?# end \n', text1)
+            if address in dict1:
             #print '3 '+str(time.time())
-            if result:
-                #not_found = 0
-                #print 'leng'+str(len(result.group()))
-                #print result.group()
-                text[line:line] = result[len(result)-1]
+                text[line:line] = dict1[address]
             #print '4 '+str(time.time())
         line += 1
         if line == len(text):
@@ -65,11 +61,27 @@ def read_in_chunks(file_object, chunk_size=200000000): # 200000000, 21 blocks
         yield data
 
 
+def dohash(data):
+    dict1 = {}
+    result = re.findall('OP after liveness analysis:\n ---- 0x.+', data)
+    for i in xrange(len(result)):
+        address = result[i].split('x')[1]
+        #print address
+        dict1[address] = re.search('OP after liveness analysis:\n ---- 0x'+ address +'[\s\S]+?# end \n', data).group()
+        #print dict1
+        #if '76fda015' in dict1:
+            #print 1
+    return dict1
+
+
 f1 = open(DataWarehouse)
 count = 0
 
 for piece in read_in_chunks(f1):
-    text = fetch(text,piece)
+
+    dict1 = dohash(piece)
+
+    text = fetch(text,dict1)
     #print len(text)
     count += 1
     print 'The chunk number is: '+str(count)

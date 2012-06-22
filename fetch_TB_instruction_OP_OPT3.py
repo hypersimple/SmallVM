@@ -1,12 +1,17 @@
 import re
-import time
+
+# XXX TODO FIXME Warning: The inserted CPU states are wrong, and the up address is inserted repeatedly, the data will bloat
+
+# May need to be done iteratively
 
 #DataSource = "/home/cy/project/test4.txt"
 #DataSource = "/home/cy/project/qemu12_cutted_1.log"
 #DataSource = "/home/cy/project/qemu12_cutted.log"
-DataSource = "/home/cy/project/qemu15_cutlines.log"
+#DataSource = "/home/cy/project/qemu13_cutlines.log"
+DataSource = "/home/cy/project/fetch3_test1.txt"
 #DataWarehouse = "/home/cy/qemu_all_op.log"
-DataWarehouse = "/home/cy/project/qemu13_replace_OP.log"
+#DataWarehouse = "/home/cy/project/qemu13_replace_OP.log"
+DataWarehouse = "/home/cy/project/fetch3_test2.txt"
 #DataWarehouse = "/home/cy/project/test5.txt"
 #DataDest = "/home/cy/project/test6.txt"
 
@@ -18,36 +23,33 @@ text = f.readlines()  #Text is a string array
 
 #f2 = open ("/home/cy/project/test8.txt", "w") 
 #f2 = open ("/home/cy/project/qemu12_processed_1_temp.log", "w")
-f2 = open ("/home/cy/project/qemu15_fetch.log", "w")
+f2 = open ("/home/cy/project/fetch3_test_dest2.log", "w")
 
 
 def fetch(text,text1):
     #text2 = []
     #line2 = 0
-    # Seems should be from the second line, Done
+    # XXX Seems should be from the second line
     #for line in xrange(0,len(text)):
-    line = 1
+    line = 0
     while(1):
-        #print '1 '+str(time.time())
         if text[line].startswith('Trace') and text[line-1].startswith('&'):
+            address1 = (text[line-2].split()[2].split('[')[1].split(']')[0]).lstrip('0')
             #not_found = 1
-            address = text[line].split()[2].split('[')[1].split(']')[0]
-            address = address.lstrip('0')
-            #print '2 '+str(time.time())
-            result = re.findall('OP after liveness analysis:\n ---- 0x'+ address +'[\s\S]+?# end \n', text1)
-            #print '3 '+str(time.time())
+            address = (text[line].split()[2].split('[')[1].split(']')[0]).lstrip('0')
+            result = re.search('OP after liveness analysis:\n ---- 0x'+ address1 +'[\s\S]+?OP after liveness analysis:\n ---- 0x'+ address +'[\s\S]+?# end \n', text1)    # Search from front
             if result:
                 #not_found = 0
                 #print 'leng'+str(len(result.group()))
                 #print result.group()
-                text[line:line] = result[len(result)-1]
-            #print '4 '+str(time.time())
+                text[line:line] = result.group()
+            else:
+                print address+' NOT FOUND'
         line += 1
         if line == len(text):
             break
         if line%1000 == 0:
             print line
-        #print '5 '+str(time.time())
     return text
     '''
     if(not_found):

@@ -22,7 +22,7 @@ def check(text):
     '''
 
 #DataSource = "/home/cy/project/qemu12_processed_ccs.log"
-DataSource = "/home/cy/project/qemu13_fetch.log"
+DataSource = "/home/cy/project/qemu15_fetch.log"
 
 f = open(DataSource, "r")
 text = f.readlines()  #Text is a string array

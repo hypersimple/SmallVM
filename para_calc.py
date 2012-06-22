@@ -73,8 +73,11 @@ def srcpara(microop):
         microop.split()[1] == "movi_i64" or \
         \
         microop.split()[1] == "neg_i32" or \
-        \
-        microop.split()[1] == "qemu_ld32" or \
+        microop.split()[1] == "not_i32" :
+        srcset.append( microop.split()[2].split(',')[1] )
+        
+        
+    elif microop.split()[1] == "qemu_ld32" or \
         microop.split()[1] == "qemu_ld8u" or \
         microop.split()[1] == "qemu_ld8s" or \
         microop.split()[1] == "qemu_ld16u" or \
@@ -82,9 +85,10 @@ def srcpara(microop):
         microop.split()[1] == "qemu_ld32u" or \
         microop.split()[1] == "qemu_ld32s" or \
         microop.split()[1] == "qemu_ld64" :
-        
-        srcset.append( microop.split()[2].split(',')[1] )
-        
+        #FIXME: Here we only consider ld32, ld16s, ld16u as described in the instruction_calc_pre2.py        
+        srcset.append( microop.split()[2].split(',')[1].split('{')[0] )
+
+
     elif microop.split()[1] == "qemu_st8" or \
         microop.split()[1] == "qemu_st16" or \
         microop.split()[1] == "qemu_st32" or \
@@ -102,7 +106,6 @@ def srcpara(microop):
         microop.split()[1] == "and_i32" or \
         microop.split()[1] == "or_i32" or \
         microop.split()[1] == "xor_i32" or \
-        microop.split()[1] == "not_i32" or \
         microop.split()[1] == "shl_i32" or \
         microop.split()[1] == "shr_i32" or \
         microop.split()[1] == "sar_i32" or \
