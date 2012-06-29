@@ -1,16 +1,16 @@
 from mem_func import *
 
 def get_cpu_env(cpu_string,reg):
-    if cpu_string.startswith('&') and cpu_string.endswith('HLT=0'):   #XXX: NO '\n'
-        reg['eax'] = int(cpu_string.split()[1].split('=')[1], 16)
-        reg['ebx'] = int(cpu_string.split()[2].split('=')[1], 16)
-        reg['ecx'] = int(cpu_string.split()[3].split('=')[1], 16)
-        reg['edx'] = int(cpu_string.split()[4].split('=')[1], 16)
-        reg['esi'] = int(cpu_string.split()[5].split('=')[1], 16)
-        reg['edi'] = int(cpu_string.split()[6].split('=')[1], 16)
-        reg['ebp'] = int(cpu_string.split()[7].split('=')[1], 16)
-        reg['esp'] = int(cpu_string.split()[8].split('=')[1], 16)
-        reg['eip'] = int(cpu_string.split()[9].split('=')[1], 16)
+    if cpu_string.startswith('@'):   #XXX: NO '\n'
+        reg['eax'] = int(cpu_string.split()[3].split('=')[1], 16)
+        reg['ebx'] = int(cpu_string.split()[4].split('=')[1], 16)
+        reg['ecx'] = int(cpu_string.split()[5].split('=')[1], 16)
+        reg['edx'] = int(cpu_string.split()[6].split('=')[1], 16)
+        reg['esi'] = int(cpu_string.split()[7].split('=')[1], 16)
+        reg['edi'] = int(cpu_string.split()[8].split('=')[1], 16)
+        reg['ebp'] = int(cpu_string.split()[9].split('=')[1], 16)
+        reg['esp'] = int(cpu_string.split()[10].split('=')[1], 16)
+        reg['eip'] = int(cpu_string.split()[1].split('=')[1], 16)
         #return reg
         #print '%x'%reg['eax']
     else:
@@ -49,7 +49,23 @@ def print_str(mem,loc_vir,memmap_table):
         loc += 1
     print buf
 
+# XXX: two formats:
+# 12345 # mov_i32
+# # mov_i32
 
+def name(microop):
+    return microop.split()[2]
+def para1(microop):
+    return microop.split()[3].split(',')[0]
+def para2(microop):
+    return microop.split()[3].split(',')[1]
+def para3(microop):
+    return microop.split()[3].split(',')[2]
+def para4(microop):
+    return microop.split()[3].split(',')[3]
+
+
+'''
 def name(microop):
     return microop.split()[1]
 def para1(microop):
@@ -60,12 +76,25 @@ def para3(microop):
     return microop.split()[2].split(',')[2]
 def para4(microop):
     return microop.split()[2].split(',')[3]
+'''
+
 
 
 def execute_op(microop,reg,tmp,mem,memmap_table):
-    print microop
-    #TODO : and_i32 and or_i32 are very important for comparing
+
+    print 'CPU: EAX=%08x '%reg['eax'] + 'EBX=%08x '%reg['ebx']\
+    + 'ECX=%08x '%reg['ecx'] + 'EDX=%08x '%reg['edx'] + 'ESI=%08x '%reg['esi']\
+    + 'EDI=%08x '%reg['edi'] + 'EBP=%08x '%reg['ebp'] + 'ESP=%08x '%reg['esp']
     
+    print 'tmp0=%08x '%tmp['tmp0'] + 'tmp1=%08x '%tmp['tmp1']\
+    + 'tmp2=%08x '%tmp['tmp2'] + 'tmp3=%08x '%tmp['tmp3'] + 'tmp4=%08x '%tmp['tmp4']\
+    + 'tmp5=%08x '%tmp['tmp5'] + 'tmp6=%08x '%tmp['tmp6'] + 'tmp7=%08x '%tmp['tmp7']\
+    + 'tmp8=%08x '%tmp['tmp8'] + 'tmp9=%08x '%tmp['tmp9'] + 'tmp10=%08x '%tmp['tmp10']\
+    + 'tmp11=%08x '%tmp['tmp11'] + 'tmp12=%08x '%tmp['tmp12']
+    
+    print microop
+
+
     if name(microop) == "mov_i32":
         # mov_i32 tmp0,esi
         # "src" and "dst" are strings, sth like tmp['tmp0']
@@ -154,6 +183,20 @@ def execute_op(microop,reg,tmp,mem,memmap_table):
                 qemu_st32_mem(mem, loc, data)
             elif name_op == 'qemu_st16':
                 qemu_st16_mem(mem, loc, data)
+                
+                
+        elif src.startswith('tmp') and dst.startswith('tmp'):
+            #TODO:transfer from virtual to physical
+            
+            data = tmp[src]
+            #loc_vir = tmp[dst]
+            loc_vir = tmp[dst]   # XXX:the format may change, this the transformed constant format
+            loc = memmap(loc_vir,memmap_table)
+            
+            if name_op == 'qemu_st32':
+                qemu_st32_mem(mem, loc, data)
+            elif name_op == 'qemu_st16':
+                qemu_st16_mem(mem, loc, data)
 
 
 
@@ -166,7 +209,7 @@ def execute_op(microop,reg,tmp,mem,memmap_table):
         #if dst.startswith('tmp') and src.startswith('tmp'):
         if dst.startswith('tmp') and src.startswith('*'):
         
-            loc_vir = int(src.split('x')[1].split('{')[0],16)    # XXX:the format may change
+            loc_vir = int(src.split('x')[1].split('{')[0],16)    # XXX:the format may change, this the transformed constant format
             loc = memmap(loc_vir,memmap_table)
 
             if name_op == 'qemu_ld32':
@@ -176,6 +219,20 @@ def execute_op(microop,reg,tmp,mem,memmap_table):
             elif name_op == 'qemu_ld16u':
                 data = qemu_ld16u_mem(mem, loc)
             tmp[dst] = data
+            
+        elif dst.startswith('tmp') and src.startswith('tmp'):
+        
+            loc_vir = tmp[src]    # XXX:the format may change
+            loc = memmap(loc_vir,memmap_table)
+
+            if name_op == 'qemu_ld32':
+                data = qemu_ld32_mem(mem, loc)
+            elif name_op == 'qemu_ld16s':
+                data = qemu_ld16s_mem(mem, loc)
+            elif name_op == 'qemu_ld16u':
+                data = qemu_ld16u_mem(mem, loc)
+            tmp[dst] = data
+            
 
     elif name(microop) == "sub_i32":
         src1 = para2(microop)
@@ -236,22 +293,24 @@ def execute_all(trace_file,reg,tmp,mem,memmap_table):
     f.close()
     for microop in text:
         execute_op(microop,reg,tmp,mem,memmap_table)
-    #print '%x'%reg['eax']
+    print 'EAX=%08x'%reg['eax']
     print_str(mem,reg['eax'],memmap_table)
     
 
 
 #-----------------------------------------------------------------------------------------    
 # Specify the files
-memory_file = "/home/cy/xp15.dmp"
-memmap_file = "/home/cy/project/memmap15"
-cpu_env = '& EAX=09c00501 EBX=00147cc0 ECX=0000029d EDX=00000009 ESI=00000000 EDI=00000000 EBP=0012fa28 ESP=0012f9f8 EIP=7e433f07 EFL=00000246 [---Z-P-] CR3=0f397000 CPL=3 II=0 A20=1 SMM=0 HLT=0'
-trace_file = "/home/cy/project/slicing_result.txt"
+memory_file = "/home/cy/xp17_1.dmp"
+memmap_file = "memmap17_1"
+cpu_env = '@ EIP=804de710 CR3=03267000 EAX=000010f7 EBX=7e4298d5 ECX=80042000 EDX=0013e7c4 ESI=0013e8d4 EDI=001a3350 EBP=fb333934 ESP=fb3339a4 EFLAGS=00000002'
+trace_file = "qemu17_slicing.log"
 #disk = 
 #-----------------------------------------------------------------------------------------    
 #Global declaration
 reg = {}   # register, as a dict type
 tmp = {}   # tmp variable, as a dict type
+for i in xrange(40):
+    tmp['tmp'+str(i)] = 0xdeadbeef
 memmap_table = {}   # the memory mapping table
 
 get_cpu_env(cpu_env,reg)
@@ -261,7 +320,7 @@ preprocess_memmap(memmap_file,memmap_table)
 #-----------------------------------------------------------------------------------------
 
 '''
-   # We need not to assign the value back
+# We need not to assign the value back
 print '%x'%reg['eip']
 #-----------------------------------------------------------------------------------------
 

@@ -18,7 +18,7 @@ text = f.readlines()  #Text is a string array
 
 #f2 = open ("/home/cy/project/test8_2.txt", "w") 
 #f2 = open ("/home/cy/project/qemu12_processed_1_temp.log", "w")
-f2 = open ("/home/cy/project/qemu15_fetch2.log", "w")
+f2 = open ("/home/cy/project/qemu15_fetch3.log", "w")
 
 
 def fetch(text,dict1):
@@ -26,23 +26,49 @@ def fetch(text,dict1):
     #line2 = 0
     # Seems should be from the second line, Done
     #for line in xrange(0,len(text)):
+    time1 = 0
+    time2 = 0
+    time3 = 0
+    time4 = 0
+    time5 = 0
+    time6 = 0
+    
     line = 0
     while(1):
-        #print '1 '+str(time.time())
+        #print datetime.now()
+        #print '1 '+'%.10f'%time.time())
+        time1 = time.time()
+        
         if text[line].startswith('Trace') and text[line-1].startswith('&'):
             #not_found = 1
             address = text[line].split()[2].split('[')[1].split(']')[0]
             address = address.lstrip('0')
-            #print '2 '+str(time.time())
+            
+            time2 = time.time()
+            print '2 '+'%.10f'% (time2-time1)
+            
             if address in dict1:
-            #print '3 '+str(time.time())
+            
+                time3 = time.time()
+                print '3 '+'%.10f'% (time3-time2)
+                
                 text[line:line] = dict1[address]
-            #print '4 '+str(time.time())
+                
+            time4 = time.time()
+            print '4 '+'%.10f'% (time4-time3)
+            
         line += 1
         if line == len(text):
             break
+        
+        time5 = time.time()
+        print '5 '+'%.10f'% (time5-time4)
+        
         if line%1000000 == 0:
             print line
+            
+        time6 = time.time()
+        print '6 '+'%.10f'% (time6-time5)
         #print '5 '+str(time.time())
     return text
     '''

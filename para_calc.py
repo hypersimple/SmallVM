@@ -3,7 +3,6 @@
 # To calculate the destination parameter
 def destpara(microop):
     destset = []
-    
     if  microop.split()[1] == "mov_i32" or \
         microop.split()[1] == "movi_i32" or \
         microop.split()[1] == "movi_i64" or \
@@ -33,7 +32,9 @@ def destpara(microop):
         microop.split()[1] == "shr_i32" or \
         microop.split()[1] == "sar_i32" or \
         microop.split()[1] == "rotl_i32" or \
-        microop.split()[1] == "rotr_i32" :
+        microop.split()[1] == "rotr_i32" or \
+        \
+        microop.split()[1] == "deposit_i32" :
        
         destset.append( microop.split()[2].split(',')[0] )
     
@@ -43,7 +44,9 @@ def destpara(microop):
         microop.split()[1] == "qemu_st32" or \
         microop.split()[1] == "qemu_st64" :
         
-        destset.append( microop.split()[2].split(',')[1] )
+        #destset.append( microop.split()[2].split(',')[1] )
+        destset.append( microop.split()[2].split(',')[1].split('{')[0] )    
+    
     
     elif microop.split()[1] == "bswap32_i32" or \
         \
@@ -85,7 +88,7 @@ def srcpara(microop):
         microop.split()[1] == "qemu_ld32u" or \
         microop.split()[1] == "qemu_ld32s" or \
         microop.split()[1] == "qemu_ld64" :
-        #FIXME: Here we only consider ld32, ld16s, ld16u as described in the instruction_calc_pre2.py        
+        #FIXME: Here we only consider ld32, ld16s, ld16u as described in the instruction_calc_pre2.py
         srcset.append( microop.split()[2].split(',')[1].split('{')[0] )
 
 
@@ -110,7 +113,9 @@ def srcpara(microop):
         microop.split()[1] == "shr_i32" or \
         microop.split()[1] == "sar_i32" or \
         microop.split()[1] == "rotl_i32" or \
-        microop.split()[1] == "rotr_i32" :
+        microop.split()[1] == "rotr_i32" or \
+        \
+        microop.split()[1] == "deposit_i32" :
         
         srcset.append( microop.split()[2].split(',')[1] )
         srcset.append( microop.split()[2].split(',')[2] )

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-import string
-import sys
+#import string
+#import sys
 #import re
 
 '''
@@ -20,13 +20,13 @@ for piece in read_in_chunks(f):
     process_data(piece)
 '''
 
-start_line = 25338314 #-50
-end_line = 25366055  #+5
+start_line = 11950000 #-50
+end_line = 11962427  #+5
 
 
-DataSource = "/home/cy/project/qemu13_replace_OP.log"
+DataSource = "qemu17_de_duplicate.log"
 
-f2 = open ("/home/cy/project/qemu13_cutlines.log", "w")
+f2 = open ("qemu17_cutlines.log", "w")
 
 
 # Rewrite, not append file
