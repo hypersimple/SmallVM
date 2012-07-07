@@ -147,7 +147,7 @@ def execute_op(microop,reg,tmp,mem,memmap_table,text,count,cr3):
             #TODO: some strange para
             #print 'shl_i32 error'
 
-    elif name(microop) == "qemu_st32" or name(microop) == "qemu_st16":
+    elif name(microop) == "qemu_st32" or name(microop) == "qemu_st16" or name(microop) == "qemu_st8":
         # qemu_st32 tmp1,tmp2,flag  ; from data tmp1 to location tmp2
         name_op = name(microop)
         src = para1(microop)
@@ -170,6 +170,8 @@ def execute_op(microop,reg,tmp,mem,memmap_table,text,count,cr3):
                     qemu_st32_mem(mem, loc, data)
                 elif name_op == 'qemu_st16':
                     qemu_st16_mem(mem, loc, data)
+                elif name_op == 'qemu_st8':
+                    qemu_st8_mem(mem, loc, data)
             except:
                 print 'qemu_st error'+'%x'%loc_vir+ ' '+cr3
 
@@ -192,6 +194,9 @@ def execute_op(microop,reg,tmp,mem,memmap_table,text,count,cr3):
                     qemu_st32_mem(mem, loc, data)
                 elif name_op == 'qemu_st16':
                     qemu_st16_mem(mem, loc, data)
+                elif name_op == 'qemu_st8':
+                    qemu_st8_mem(mem, loc, data)
+            
             except:
                 print 'qemu_st error!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!' 
 
@@ -199,7 +204,7 @@ def execute_op(microop,reg,tmp,mem,memmap_table,text,count,cr3):
 
 
 
-    elif name(microop) == "qemu_ld32" or name(microop) == "qemu_ld16s" or name(microop) == "qemu_ld16u":     # TODO: loc17 not all tmp
+    elif name(microop) == "qemu_ld32" or name(microop) == "qemu_ld16s" or name(microop) == "qemu_ld16u" or name(microop) == "qemu_ld8s" or name(microop) == "qemu_ld8u":     # TODO: loc17 not all tmp
         # qemu_ld32 tmp1,tmp2,flag   ;  from location tmp2 to data tmp1
         name_op = name(microop)
         dst = para1(microop)
@@ -221,6 +226,11 @@ def execute_op(microop,reg,tmp,mem,memmap_table,text,count,cr3):
                     data = qemu_ld16s_mem(mem, loc)
                 elif name_op == 'qemu_ld16u':
                     data = qemu_ld16u_mem(mem, loc)
+                elif name_op == 'qemu_ld8s':
+                    data = qemu_ld8s_mem(mem, loc)
+                elif name_op == 'qemu_ld8u':
+                    data = qemu_ld8u_mem(mem, loc)
+                
                 if data:
                     tmp[dst] = data
                 
@@ -249,6 +259,11 @@ def execute_op(microop,reg,tmp,mem,memmap_table,text,count,cr3):
                     data = qemu_ld16s_mem(mem, loc)
                 elif name_op == 'qemu_ld16u':
                     data = qemu_ld16u_mem(mem, loc)
+                elif name_op == 'qemu_ld8s':
+                    data = qemu_ld8s_mem(mem, loc)
+                elif name_op == 'qemu_ld8u':
+                    data = qemu_ld8u_mem(mem, loc)
+                
                 if data:
                     tmp[dst] = data
             except:
@@ -459,21 +474,24 @@ def execute_all(text,reg,tmp,mem,memmap_table,cr3):
 
 #-----------------------------------------------------------------------------------------    
 # Specify the files
-number = 5
+number = 0
 
-memory_file = "./qemu19/qemu19_mem_"+str(number-1)
-#memory_file = "/home/cy/xp19_1.dmp"
-psscan_file = "psscan19"
-memmap_file = "/home/cy/memmap19_1"
+#memory_file = "./qemu19/qemu19_mem_"+str(number-1)
+memory_file = "/home/cy/xp21_1.dmp"
+psscan_file = "/home/cy/psscan21"
+memmap_file = "/home/cy/memmap21_2"
 # the cpu_env is kind of useless
 cpu_env = '@ EIP=bf8ed843 CR3=03267000 EAX=0000ce57 EBX=e119509c ECX=0000c800 EDX=0000c800 ESI=e1039368 EDI=000000c0 EBP=fb333280 ESP=fb333278 EFLAGS=00000202'
 
-cpu_file = "./qemu19/qemu19_cpu_part_"+str(number)
+#cpu_file = "./qemu21/qemu21_cpu_part_"+str(number)
 #cpu_file = "./qemu19/qemu19_cpu_part_0"
-hashfile = 'qemu19_de_duplicate.log'
-pre_calc_destfile = "./qemu19/qemu19_ins_"+str(number)+'_b'
+cpu_file = "./qemu21/qemu21_cpu.log"
 
-save_mem_file = './qemu19/qemu19_mem_'+str(number)
+hashfile = 'qemu21_de_duplicate.log'
+#pre_calc_destfile = "./qemu21/qemu21_ins_"+str(number)+'_b'
+pre_calc_destfile = "./qemu21/qemu21_ins3"
+
+save_mem_file = './qemu21/qemu21_mem_'+str(number)
 #disk = 
 #-----------------------------------------------------------------------------------------    
 #Global declaration
@@ -515,6 +533,7 @@ print '%x'%memmap(0x800e1fff,'00039000',memmap_table)
 #XXX:
 #print memmap_table[0x80550f24,'00039000']  # some addresses are not found, maybe the code to modify page table
 # some addresses are very weird, like fee00300, out of range
+'''
 # ------------------------------------------
 # deposit_i32 test
 text = '1'
@@ -526,7 +545,7 @@ tmp['tmp0'] = 0x140011
 execute_op('# deposit_i32 eax,eax,tmp0,$0x0,$0x8',reg,tmp,mem,memmap_table,text,count,cr3)
 print '%x'%reg['eax']
 # -------------------------------------------
-
+'''
 
 
 f1 = open(hashfile)
@@ -566,7 +585,7 @@ while(line <= len(text)-1):
     if cpu_count % 10000 == 0:
         print cpu_count
 
-#save_mem(save_mem_file,mem)
+save_mem(save_mem_file,mem)
 
 f2 = open(pre_calc_destfile,"w")
 for line2 in text:

@@ -113,9 +113,9 @@ def srcpara(microop):
         microop.split()[1] == "shr_i32" or \
         microop.split()[1] == "sar_i32" or \
         microop.split()[1] == "rotl_i32" or \
-        microop.split()[1] == "rotr_i32" or \
-        \
-        microop.split()[1] == "deposit_i32" :
+        microop.split()[1] == "rotr_i32" :
+        
+        #microop.split()[1] == "deposit_i32" :
         
         srcset.append( microop.split()[2].split(',')[1] )
         srcset.append( microop.split()[2].split(',')[2] )
@@ -132,7 +132,10 @@ def srcpara(microop):
         srcset.append( microop.split()[2].split(',')[0] )
         srcset.append( microop.split()[2].split(',')[1] )
         
+    elif microop.split()[1] == "deposit_i32" :
+        srcset.append( microop.split()[2].split(',')[2] )
+        
     else:
-        srcset.append("$Unknown_dest_para")
+        srcset.append("$Unknown_src_para")
         
     return srcset

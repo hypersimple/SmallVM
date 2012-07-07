@@ -14,4 +14,4 @@ def get_only_cpu(sourcefile,destfile):
     f2.close()
     
     
-get_only_cpu('qemu19_de_duplicate.log','qemu19_cpu.log')
+get_only_cpu('qemu21_de_duplicate.log','qemu21_cpu.log')

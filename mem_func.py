@@ -21,6 +21,16 @@ def qemu_st16_mem(mem, loc, data):
         print 'qemu_st16_mem error,loc: '+'%x'%loc
         #pass
 
+
+def qemu_st8_mem(mem, loc, data):
+    try:
+        mem[loc] = data & 0xff
+        #return mem
+    except:
+        print 'qemu_st8_mem error,loc: '+'%x'%loc
+        #pass
+
+
 def qemu_ld32_mem(mem, loc):
     try:
         result = mem[loc]
@@ -51,4 +61,24 @@ def qemu_ld16s_mem(mem, loc):
         return result
     except:
         print 'qemu_ld16s_mem error,loc: '+'%x'%loc
+        #pass
+
+
+def qemu_ld8u_mem(mem, loc):
+    try:
+        result = mem[loc]
+        return result
+    except:
+        print 'qemu_ld8u_mem error,loc: '+'%x'%loc
+        #pass
+
+
+def qemu_ld8s_mem(mem, loc):
+    try:
+        result = mem[loc]
+        if result & 0x80 == 0x80:   # Signed extension
+            result += 0xffffff00
+        return result
+    except:
+        print 'qemu_ld8s_mem error,loc: '+'%x'%loc
         #pass
