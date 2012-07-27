@@ -15,12 +15,13 @@ def de_deplicate(sourcefile,destfile):
     f1.close()
 
     for line in xrange(len(text)):
-        for subline in xrange(1,200):
-            if (line+subline) < len(text):
-                if text[line+subline] == text[line]:
-                    text[line+subline] = ''
-                else:
-                    break
+        if text[line].startswith('@'):
+            for subline in xrange(1,200):
+                if (line+subline) < len(text):
+                    if text[line+subline] == text[line]:
+                        text[line+subline] = ''
+                    else:
+                        break
 
     f2 = open (destfile, "w") 
     for line2 in xrange(0,len(text)):

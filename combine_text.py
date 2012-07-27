@@ -20,27 +20,32 @@ for piece in read_in_chunks(f):
     process_data(piece)
 '''
 
-start_line = 602  #-50
-end_line = 851649  #+5
+
+DataSource0 = "./qemu25/qemu25_ins_0"
+DataSource1 = "./qemu25/qemu25_ins_1"
+DataSource2 = "./qemu25/qemu25_ins_2"
+DataSource3 = "./qemu25/qemu25_ins_3"
+DataSource4 = "./qemu25/qemu25_ins_4"
+DataSource5 = "./qemu25/qemu25_ins_5"
+DataSource6 = "./qemu25/qemu25_ins_6"
+DataSource7 = "./qemu25/qemu25_ins_7"
+DataSource8 = "./qemu25/qemu25_ins_8"
 
 
-DataSource = "qemu27_cpu.log"
-
-f2 = open ("qemu27_cpu1.log", "w")
+f2 = open ("./qemu25/qemu25_ins_total", "w")
 
 
 # Rewrite, not append file
 
 #result = []
-count = 0
 
-for line in open(DataSource):
-    if count == end_line:
-        break
-    elif count >= start_line - 1:
+for i in xrange(0,8+1):
+    print i
+    for line in open("./qemu25/qemu25_ins_"+str(i)):
         f2.write(line)
-    count += 1
 
+
+f2.close()
 
 
 #text = f.readlines(1)  #Text is a string array

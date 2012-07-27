@@ -16,4 +16,4 @@ def cut_cpu_into_parts(sourcefile,destfile_all,chunk_size,chunk_number):
         cut_parts(1+i*chunk_size,(i+1)*chunk_size,sourcefile,destfile_all+str(i))
 
 # chunk_number: wc -l, use the beginning number, usually
-cut_cpu_into_parts('qemu19_cpu.log','./qemu19/qemu19_cpu_part_',1000000,5)
+#cut_cpu_into_parts('qemu25_cpu1.log','./qemu25/qemu25_cpu_part_',100000,8)

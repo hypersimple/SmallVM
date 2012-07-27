@@ -40,6 +40,7 @@ def qemu_ld32_mem(mem, loc):
         return result
     except:
         print 'qemu_ld32_mem error,loc: '+'%x'%loc
+        return 0xdeadbeef
         #pass
 
     
@@ -50,6 +51,7 @@ def qemu_ld16u_mem(mem, loc):
         return result
     except:
         print 'qemu_ld16u_mem error,loc: '+'%x'%loc
+        return 0xdeadbeef
         #pass
     
 def qemu_ld16s_mem(mem, loc):
@@ -61,6 +63,7 @@ def qemu_ld16s_mem(mem, loc):
         return result
     except:
         print 'qemu_ld16s_mem error,loc: '+'%x'%loc
+        return 0xdeadbeef
         #pass
 
 
@@ -70,6 +73,7 @@ def qemu_ld8u_mem(mem, loc):
         return result
     except:
         print 'qemu_ld8u_mem error,loc: '+'%x'%loc
+        return 0xdeadbeef
         #pass
 
 
@@ -81,4 +85,5 @@ def qemu_ld8s_mem(mem, loc):
         return result
     except:
         print 'qemu_ld8s_mem error,loc: '+'%x'%loc
+        return 0xdeadbeef
         #pass
