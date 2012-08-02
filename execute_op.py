@@ -1,6 +1,6 @@
 from mem_func import *
 
-'''
+#'''
 # starts with number
 def name(microop):
     return microop.split()[2]
@@ -14,10 +14,10 @@ def para4(microop):
     return microop.split()[3].split(',')[3]
 def para5(microop):
     return microop.split()[3].split(',')[4]
+#'''
+
+
 '''
-
-
-
 # starts with #
 def name(microop):
     return microop.split()[1]
@@ -31,8 +31,7 @@ def para4(microop):
     return microop.split()[2].split(',')[3]
 def para5(microop):
     return microop.split()[2].split(',')[4]
-
-
+'''
 
 
 def memmap(virtual,cr3,memmap_table):
@@ -41,15 +40,16 @@ def memmap(virtual,cr3,memmap_table):
     else:
         #print 'memmap error: ' + '0x%x'%(virtual) + ' | cr3: ' +cr3
         # Too many errors
-        return 0x01111111
+        return 0xdeadbeef
 
 
-def execute_op(microop,reg,tmp,mem,memmap_table,text,count,cr3):
+def execute_op(microop,reg,tmp,mem,memmap_table,text,count,cr3,vmem):
 
 
     PRINT_ERROR = 1
     PRINT_OTHER_ERROR = 0
     PRINT_MEM_ERROR = 0
+    PRINT_UNDEFINED_ERROR = 1
 
 
 
@@ -174,16 +174,28 @@ def execute_op(microop,reg,tmp,mem,memmap_table,text,count,cr3):
             #print '%x'%loc_vir
             
             loc = memmap(loc_vir,cr3,memmap_table)
-            
-            try:
-                if name_op == 'qemu_st32':
-                    qemu_st32_mem(mem, loc, data)
-                elif name_op == 'qemu_st16':
-                    qemu_st16_mem(mem, loc, data)
-                elif name_op == 'qemu_st8':
-                    qemu_st8_mem(mem, loc, data)
-            except:
-                print 'qemu_st error: '+'%x'%loc_vir+ ' '+cr3
+
+            if len(mem) != 0 and loc != 0xdeadbeef:
+                try:
+                    if name_op == 'qemu_st32':
+                        qemu_st32_mem(mem, loc, data)
+                    elif name_op == 'qemu_st16':
+                        qemu_st16_mem(mem, loc, data)
+                    elif name_op == 'qemu_st8':
+                        qemu_st8_mem(mem, loc, data)
+                except:
+                    print 'qemu_st phy error: '+'%x'%loc_vir+ ' '+cr3
+            else:
+                try:
+                    if name_op == 'qemu_st32':
+                        qemu_st32_vmem(vmem, loc_vir, data)
+                    elif name_op == 'qemu_st16':
+                        qemu_st16_vmem(vmem, loc_vir, data)
+                    elif name_op == 'qemu_st8':
+                        qemu_st8_vmem(vmem, loc_vir, data)
+                except:
+                    print 'qemu_st vir error: '+'%x'%loc_vir+ ' '+cr3
+                    
             
             text[count] = text[count].replace('tmp2','*0x'+'%x'%loc_vir+'{' + '0x%x'%data + '}')
             
@@ -237,40 +249,78 @@ def execute_op(microop,reg,tmp,mem,memmap_table,text,count,cr3):
             #print 'loc_vir %x'%loc_vir
             #print '%x'%loc
             
-            try:
-                if name_op == 'qemu_ld32':
-                    data = qemu_ld32_mem(mem, loc)
-                elif name_op == 'qemu_ld16s':
-                    data = qemu_ld16s_mem(mem, loc)
-                elif name_op == 'qemu_ld16u':
-                    data = qemu_ld16u_mem(mem, loc)
-                elif name_op == 'qemu_ld8s':
-                    data = qemu_ld8s_mem(mem, loc)
-                elif name_op == 'qemu_ld8u':
-                    data = qemu_ld8u_mem(mem, loc)
-                
-                if data != 0xdeadbeef:
+            if len(mem) != 0 and loc != 0xdeadbeef:
+                try:
+                    if name_op == 'qemu_ld32':
+                        data = qemu_ld32_mem(mem, loc)
+                    elif name_op == 'qemu_ld16s':
+                        data = qemu_ld16s_mem(mem, loc)
+                    elif name_op == 'qemu_ld16u':
+                        data = qemu_ld16u_mem(mem, loc)
+                    elif name_op == 'qemu_ld8s':
+                        data = qemu_ld8s_mem(mem, loc)
+                    elif name_op == 'qemu_ld8u':
+                        data = qemu_ld8u_mem(mem, loc)
+                    
+                    #if data != 0xdeadbeef:
                     reg[dst] = data
+                    
+                    text[count] = text[count].replace('tmp2','*0x'+'%x'%loc_vir+'{' + '0x%x'%data + '}')
+                    
+                    '''
+                    text[count] = '# ' + name_op + ' ' + dst\
+                    + ',' + '*0x'+'%x'%loc_vir +\
+                    '{' + '0x%x'%data + '}'\
+                    + ',' + flag + '\n'
+                    '''
+                except:
+                    print 'qemu_ld phy error: '+'%x'%loc_vir+' '+cr3
+                    
+                    text[count] = text[count].replace('tmp2','*0x'+'%x'%loc_vir+'{' + '0x%x'%0xdeadbeef + '}')
                 
-                text[count] = text[count].replace('tmp2','*0x'+'%x'%loc_vir+'{' + '0x%x'%data + '}')
+                    '''
+                    text[count] = '# ' + name_op + ' ' + dst\
+                    + ',' + '*0x'+'%x'%loc_vir +\
+                    '{' + '0x%x'%0xdeadbeef + '}'\
+                    + ',' + flag #+ '\n'
+                    '''
+                    
+            else:
+                try:
+                    if name_op == 'qemu_ld32':
+                        data = qemu_ld32_vmem(vmem, loc_vir)
+                    elif name_op == 'qemu_ld16s':
+                        data = qemu_ld16s_vmem(vmem, loc_vir)
+                    elif name_op == 'qemu_ld16u':
+                        data = qemu_ld16u_vmem(vmem, loc_vir)
+                    elif name_op == 'qemu_ld8s':
+                        data = qemu_ld8s_vmem(vmem, loc_vir)
+                    elif name_op == 'qemu_ld8u':
+                        data = qemu_ld8u_vmem(vmem, loc_vir)
+                    
+                    #if data != 0xdeadbeef:
+                    reg[dst] = data
+                    
+                    text[count] = text[count].replace('tmp2','*0x'+'%x'%loc_vir+'{' + '0x%x'%data + '}')
+                    
+                    '''
+                    text[count] = '# ' + name_op + ' ' + dst\
+                    + ',' + '*0x'+'%x'%loc_vir +\
+                    '{' + '0x%x'%data + '}'\
+                    + ',' + flag + '\n'
+                    '''
+                except:
+                    print 'qemu_ld vir error: '+'%x'%loc_vir+' '+cr3
+                    
+                    text[count] = text[count].replace('tmp2','*0x'+'%x'%loc_vir+'{' + '0x%x'%0xdeadbeef + '}')
                 
-                '''
-                text[count] = '# ' + name_op + ' ' + dst\
-                + ',' + '*0x'+'%x'%loc_vir +\
-                '{' + '0x%x'%data + '}'\
-                + ',' + flag + '\n'
-                '''
-            except:
-                print 'qemu_ld error: '+'%x'%loc_vir+' '+cr3
+                    '''
+                    text[count] = '# ' + name_op + ' ' + dst\
+                    + ',' + '*0x'+'%x'%loc_vir +\
+                    '{' + '0x%x'%0xdeadbeef + '}'\
+                    + ',' + flag #+ '\n'
+                    '''
                 
-                text[count] = text[count].replace('tmp2','*0x'+'%x'%loc_vir+'{' + '0x%x'%0xdeadbeef + '}')
-                
-                '''
-                text[count] = '# ' + name_op + ' ' + dst\
-                + ',' + '*0x'+'%x'%loc_vir +\
-                '{' + '0x%x'%0xdeadbeef + '}'\
-                + ',' + flag #+ '\n'
-                '''
                 
         elif dst.startswith('tmp') and src.startswith('*'):
         
@@ -475,7 +525,10 @@ def execute_op(microop,reg,tmp,mem,memmap_table,text,count,cr3):
         src = para2(microop)
         dst = para1(microop)
         try:
-            reg[dst] = ((reg[src] & 0x000000ff) | 0xffffff00) % 0x100000000
+            if (reg[src] & 0x00000080):
+                reg[dst] = ((reg[src] & 0x000000ff) | 0xffffff00) % 0x100000000
+            else:
+                reg[dst] = (reg[src] & 0x000000ff) % 0x100000000
         except:
             if PRINT_ERROR == 1:
                 print microop
@@ -517,6 +570,146 @@ def execute_op(microop,reg,tmp,mem,memmap_table,text,count,cr3):
                 pass
 
 
+    elif name(microop) == "neg_i32":     #XXX: Not confirmed
+        src1 = para2(microop)
+        dst = para1(microop)
+        
+        try:
+            reg[dst] = ~reg[src1]+1 % 0x100000000
+        except:
+            if PRINT_ERROR == 1:
+                print microop
+            else:
+                pass
+
+
+
+    elif name(microop) == "mul_i64":
+
+        src1 = para2(microop)
+        src2 = para3(microop)
+        dst = para1(microop)
+
+        try:
+            reg[dst] = (reg[src1] * reg[src2]) % 0x10000000000000000
+        except:
+            if PRINT_ERROR == 1:
+                print microop
+            else:
+                pass
+
+        
+    elif name(microop) == "ext32u_i64":
+        src = para2(microop)
+        dst = para1(microop)
+
+        #if src.startswith('e'):
+            #tmp[dst] = (reg[src1] | tmp[src]) % 0x100000000
+        try:
+            reg[dst] = (reg[src] & 0x00000000ffffffff) % 0x10000000000000000
+        except:
+            if PRINT_ERROR == 1:
+                print microop
+            else:
+                pass
+
+
+    elif name(microop) == "ext32s_i64":
+        src = para2(microop)
+        dst = para1(microop)
+        try:
+            if (reg[src] & 0x0000000080000000):
+                reg[dst] = ((reg[src] & 0x00000000ffffffff) | 0xffffffff00000000) % 0x10000000000000000
+            else:
+                reg[dst] = (reg[src] & 0x00000000ffffffff) % 0x10000000000000000
+        except:
+            if PRINT_ERROR == 1:
+                print microop
+            else:
+                pass
+
+
+    elif name(microop) == "shr_i64":
+        src1 = para2(microop)
+        src2 = para3(microop)
+        dst = para1(microop)
+        
+        try:
+            reg[dst] = (reg[src1] >> reg[src2]) % 0x10000000000000000
+        except:
+            if PRINT_ERROR == 1:
+                print microop
+            else:
+                pass
+
+
+    elif name(microop) == "add_i64":
+        src1 = para2(microop)
+        src2 = para3(microop)
+        dst = para1(microop)
+
+        try:
+            reg[dst] = (reg[src1] + reg[src2]) % 0x10000000000000000
+        except:
+            if PRINT_ERROR == 1:
+                print microop
+            else:
+                pass
+
+
+    elif name(microop) == "ld_i32":
+        dst = para1(microop)
+        env = para2(microop)
+        constant = para3(microop)
+        
+        try:
+            if env == 'env':
+                if constant.startswith('$0x84'):
+                    reg[dst] = reg['fs_base']
+                elif constant.startswith('$0x74'):   # ds_base, always=0
+                    reg[dst] = 0
+                elif constant.startswith('$0x34'): # es related, always=1
+                    reg[dst] = 1
+                else:
+                    reg[dst] = 0
+                    if PRINT_ERROR == 1:
+                        print microop
+                     
+            else:
+                if PRINT_ERROR == 1:
+                    print microop
+            
+        except:
+            if PRINT_ERROR == 1:
+                print microop
+            else:
+                pass
+
+
+    elif name(microop) == "st_i32":
+        src = para1(microop)
+        env = para2(microop)
+        constant = para3(microop)
+        
+        try:
+            if env == 'env':
+                if constant.startswith('$0x84'):
+                    reg[fs_base] = reg[src]
+                else:
+                    if PRINT_ERROR == 1:
+                        print microop
+                     
+            else:
+                if PRINT_ERROR == 1:
+                    print microop
+            
+        except:
+            if PRINT_ERROR == 1:
+                print microop
+            else:
+                pass
+
+
     elif name(microop).startswith('goto')\
         or name(microop).startswith('st_')\
         or name(microop).startswith('ld_')\
@@ -535,7 +728,7 @@ def execute_op(microop,reg,tmp,mem,memmap_table,text,count,cr3):
             pass
                 
     else:
-        if PRINT_OTHER_ERROR == 1:
+        if PRINT_UNDEFINED_ERROR == 1:
             print microop
         else:
             pass

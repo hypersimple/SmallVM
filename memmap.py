@@ -23,7 +23,7 @@ def memmap(virtual,cr3,memmap_table):
     else:
         #print 'memmap error: ' + '0x%x'%(virtual) + ' | cr3: ' +cr3
         # Too many errors
-        return 0x01111111
+        return 0xdeadbeef
 
 
 def pidmap(pid,psscan_table):
@@ -62,7 +62,7 @@ cr3 = pidmap(pid,psscan_table)
 #print cr3
 
 loc_vir = \
-0x9000018
+0x12a9bc
 
 
 print '0x%x'%memmap(loc_vir,cr3,memmap_table)

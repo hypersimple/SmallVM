@@ -1,10 +1,5 @@
-#DataSource1 = "./qemu31/qemu31_rm_int.log"
-#DataSource2 = "./qemu32/qemu32_rm_int.log"
-
-
-DataSource1 = "./qemu37/run_result_37_2_a"
-DataSource2 = "./qemu37/only_instr37.log"
-
+DataSource1 = "./qemu31/qemu31_rm_int.log"
+DataSource2 = "./qemu32/qemu32_rm_int.log"
 
 f1 = open(DataSource1, "r")
 text1 = f1.readlines()
@@ -14,12 +9,13 @@ f2 = open(DataSource2, "r")
 text2 = f2.readlines()
 f2.close()
 
-#count = 0
-count1 = 9927 -1
-count2 = 9927 -1
+# From where
+count1 = 595 - 1
+
+count2 = 594 - 1
 
 while(1):
-    if text1[count1] == text2[count2]:
+    if text1[count1].split()[1] == text2[count2].split()[1]:
         count1 += 1
         count2 += 1
     else:

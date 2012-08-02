@@ -1,10 +1,10 @@
-DataSource = "./qemu30/qemu30_ins_total4"
+DataSource = "./qemu37/qemu37_ins_total"
 
 f = open(DataSource, "r")
 text = f.readlines()
 f.close()
 
-f2 = open('./qemu30/only_instr30.log','w')
+f2 = open('./qemu37/only_instr37.log','w')
 
 for line in xrange(len(text)):
     if text[line].startswith('#'):

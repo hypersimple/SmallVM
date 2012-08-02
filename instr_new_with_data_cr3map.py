@@ -15,6 +15,7 @@ def get_cpu_env(cpu_string,reg):
         reg['ebp'] = int(cpu_string.split()[9].split('=')[1], 16)
         reg['esp'] = int(cpu_string.split()[10].split('=')[1], 16)
         reg['eip'] = int(cpu_string.split()[1].split('=')[1], 16)
+        reg['fs_base'] = int(cpu_string.split()[12].split('=')[1], 16)
         #return reg
         #print '%x'%reg['eax']
     else:
@@ -62,7 +63,13 @@ def get_memory(memory_file):
     data = f.read()
     f.close()
     return bytearray(data)
-    
+
+
+def get_vmem(vmem_file):
+    f = open(vmem_file, 'rb')
+    data = f.read()
+    f.close()
+    return bytearray(data)
 
 
 def get_disk(disk_file):
@@ -127,7 +134,7 @@ def assign_again(number,cpu_file_init,pre_calc_destfile_init):
 
 #-----------------------------------------------------------------------------------------    
 # the cpu_env is kind of USELESS
-cpu_env = '@ EIP=7c811185 CR3=0f396000 EAX=ffffffff EBX=0012aed0 ECX=0012ad18 EDX=00000040 ESI=06cb8738 EDI=0012ad6c EBP=06cb871c ESP=0012ad00 EFLAGS=00000246'
+cpu_env = '@ EIP=7c811185 CR3=0de44000 EAX=ffffffff EBX=0012aed0 ECX=0012ad18 EDX=00000040 ESI=074903d8 EDI=0012ad6c EBP=074903bc ESP=0012ad00 EFLAGS=00000246 FS_BASE=7ffdf000'
 #-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------
@@ -138,17 +145,19 @@ cpu_env = '@ EIP=7c811185 CR3=0f396000 EAX=ffffffff EBX=0012aed0 ECX=0012ad18 ED
 # Initialize the file parameter
 
 #memory_file = "./qemu25/qemu25_mem_"+str(number-1)
-memory_file = "/home/cy/xp30_1.dmp"
+memory_file = "/home/cy/xp37_1.dmp"
 #memory_file = "./qemu25/qemu25_mem_"+'0'
 
-psscan_file = "/home/cy/psscan30"
-memmap_file = "/home/cy/memmap30_2"
+vmem_file = "/home/cy/xpv37_1.dmp"
+
+psscan_file = "/home/cy/psscan37"
+memmap_file = "/home/cy/memmap37_2"
 
 #cpu_file = "./qemu25/qemu25_cpu_part_"+str(number)
 #cpu_file = "./qemu19/qemu19_cpu_part_0"
 #cpu_file = "./qemu25/qemu25_cpu_part_0.log"
 
-hashfile = 'qemu30_de_duplicate.log'
+hashfile = 'qemu37_de_duplicate.log'
 
 #pre_calc_destfile = "./qemu21/qemu21_ins_"+str(number)+'_b'
 #pre_calc_destfile = "./qemu25/qemu25_ins_0"
@@ -156,19 +165,19 @@ hashfile = 'qemu30_de_duplicate.log'
 
 #save_mem_file = './qemu21/qemu21_mem_'+str(number)
 #save_mem_file = './qemu25/qemu25_mem_'+str(number)
-save_mem_file = './qemu30/qemu30_mem_final4'
+save_mem_file = './qemu37/qemu37_mem_final'
 
-final_ins_file = "./qemu30/qemu30_ins_total4"
+final_ins_file = "./qemu37/qemu37_ins_total"
 
 # TOTAL_NUMBER (chunk_number): wc -l, use the beginning digit,usually,XXX: 100000 level
-TOTAL_NUMBER = 1
+TOTAL_NUMBER = 0
 
 print 'Cutting cpu file...'
 
-cpu_file_init = "./qemu30/qemu30_cpu_part_"
+cpu_file_init = "./qemu37/qemu37_cpu_part_"
 #cut_cpu_into_parts('qemu29_cpu.log', cpu_file_init, 100000, TOTAL_NUMBER)
-cut_cpu_into_parts('qemu30_rm_int2.log', cpu_file_init, 100000, TOTAL_NUMBER)
-pre_calc_destfile_init = "./qemu30/qemu30_ins_"
+cut_cpu_into_parts('./qemu37/qemu37_rm_int.log', cpu_file_init, 100000, TOTAL_NUMBER)
+pre_calc_destfile_init = "./qemu37/qemu37_ins_"
 
 #disk = 
 #-----------------------------------------------------------------------------------------    
@@ -182,19 +191,25 @@ for i in xrange(50):
 reg['cc_src'] = 0xdeadbeef
 reg['cc_dst'] = 0xdeadbeef
 reg['cc_op'] = 0xdeadbeef
-reg['env'] = 0xdeadbeef
+#reg['env'] = 0xdeadbeef
 
 
 tmp = {}   # tmp variable, as a dict type
 for i in xrange(50):
     tmp['tmp'+str(i)] = 0xdeadbeef
 
-
 memmap_table = {}   # the memory mapping table
 psscan_table = {}
 
+mem = []
+vmem = []
+
+print 'Initializing memory...'
+
 get_cpu_env(cpu_env,reg)
-mem = get_memory(memory_file)
+#mem = get_memory(memory_file)
+vmem = get_vmem(vmem_file)
+
 preprocess_psscan(psscan_file,psscan_table)
 preprocess_memmap(memmap_file,memmap_table,psscan_table)
 # mem as the physical shadow memory of the guest OS
@@ -269,7 +284,7 @@ for number in xrange(0,TOTAL_NUMBER+1):
             if address in dict1:
                 tb = dict1[address]
                 tb2 = tb.split('\n')
-                tb2 = execute_all(tb2,reg,tmp,mem,memmap_table,cr3)
+                tb2 = execute_all(tb2,reg,tmp,mem,memmap_table,cr3,vmem)
                 text.insert(line+1,tb2)
             else:
                 print 'address NOT found in dict1'
@@ -305,6 +320,6 @@ for i in xrange(0, TOTAL_NUMBER+1):
 f3.close()
 
 
-save_mem(save_mem_file,mem)
+#save_mem(save_mem_file,mem)
 
 

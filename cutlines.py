@@ -20,13 +20,13 @@ for piece in read_in_chunks(f):
     process_data(piece)
 '''
 
-start_line = 602  #-50
-end_line = 851649  #+5
+start_line = 1  #-50
+end_line = 24027  #+5
 
 
-DataSource = "qemu27_cpu.log"
+DataSource = "./qemu32/qemu32_cpu1.log"
 
-f2 = open ("qemu27_cpu1.log", "w")
+f2 = open ("./qemu32/qemu32_cpu.log", "w")
 
 
 # Rewrite, not append file

@@ -9,5 +9,5 @@ def preprocess(sourcefile):
     #cutlines_cr3(sourcefile1+'_de_duplicate.log',sourcefile1+'_cutlines_cr3.log',line)
 
 #Warning:XXX: cannot be the ../ path
-preprocess('qemu30.log')
+preprocess('qemu37.log')  #XXX: DO NOT use ../qemu35.log
 
