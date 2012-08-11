@@ -32,4 +32,4 @@ def get_only_cpu(sourcefile,destfile):
     
 #get_only_cpu('qemu25_de_duplicate.log','qemu25_cpu.log')
 #get_only_cpu('test_rm_int.txt','test_rm_int1.txt')
-get_only_cpu('../qemu37.log','./qemu37/qemu37_cpu.log')
+get_only_cpu('../qemu40.log','./qemu40/qemu40_cpu.log')

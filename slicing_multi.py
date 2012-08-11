@@ -1,5 +1,6 @@
-from para_calc import *
+from para_calc2 import *
 
+# calculate only the final address
 # TODO: remove the constant number ($0x11) from slice_set / srcpara set
 
 def slicing(instr_line_0, microop,slice_set,instr_list,tmp2_dict):
@@ -34,7 +35,7 @@ def do_slicing(text,init_line_0,slice_set,instr_list,tmp2_dict):
     return (slice_set, instr_list)
 
 
-DataSource = "./qemu30/qemu30_ins_total4"
+DataSource = "./qemu38/qemu38_ins_total3"
 
 f = open(DataSource, "r")
 text = f.readlines()
@@ -49,14 +50,14 @@ init_list = []
 
 
 #init_list.append('eax')    # The destination parameter, and the line as the same
-init_list.append('*0x6c87000')
+init_list.append('tmp2')
 
 slice_set = set(init_list)
 
-slice_list.append( (4634232 - 1,'*0x6c87000') )    # Just an example
+slice_list.append( (834463 - 1,'tmp2') )    # Just an example
 
 #line = 806670 - 1        # Set the interested line; 0x7e43b6d6; the destination para
-init_line_0 = 4634232 - 1
+init_line_0 = 834463 - 1
 
 stage = 0
 last_line_0 = 1
@@ -146,7 +147,7 @@ instr_list = list(set(instr_list))
 instr_list.sort()
 
 i = 0
-f2 = open("./qemu30/qemu30_slicing_multi7.log","w")
+f2 = open("./qemu38/qemu38_slicing_multi.log","w")
 while(i != len(instr_list)):
     f2.write(str(instr_list[i][0]))
     f2.write('  ')
@@ -155,7 +156,7 @@ while(i != len(instr_list)):
 f2.close()
 
 i = 0
-f3 = open("./qemu30/qemu30_slicing_pure7.log","w")
+f3 = open("./qemu38/qemu38_slicing_pure.log","w")
 while(i != len(instr_list)):
     try:
         tmp2 = instr_list[i][1].split()[2].split(',')[1]

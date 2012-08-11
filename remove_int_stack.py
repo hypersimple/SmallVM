@@ -66,4 +66,4 @@ def remove_int(sourcefile,destfile):
     f2.close()
     
 #remove_int("test_rm_int1.txt","test_rm_int_result.txt")
-remove_int("./qemu37/qemu37_cpu.log","./qemu37/qemu37_rm_int.log")
+remove_int("./qemu40/qemu40_cpu.log","./qemu40/qemu40_rm_int.log")

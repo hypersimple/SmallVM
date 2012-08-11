@@ -46,16 +46,28 @@ def dohash(data):
         if text2[line] == 'OP after liveness analysis:':
             #print text2[line+1]
             address = text2[line+1].split('x')[1]
-            dict1[address] = text2[line]+'\n'
+            temp = text2[line]+'\n'
             for subline in xrange(1,2000):
                 if text2[line+subline] != '# end ':
-                    dict1[address] += text2[line+subline]+'\n'
+                    temp += text2[line+subline]+'\n'
                 else:
-                    dict1[address] += '# end \n'
+                    temp += '# end \n'
                     break
+            if address in dict1:
+                flag = 0
+                for i in xrange(len(dict1[address])):
+                    if dict1[address][i] == temp:
+                        flag = 1
+                if flag == 0:
+                    dict1[address].append(temp)
+            else:
+                dict1[address] = []          # a list
+                dict1[address].append(temp)
+                
         if line % 1000000 == 0:
             print float(line)/float(text2_size)
     return dict1
+
 
 
 def get_memory(memory_file):
@@ -134,7 +146,7 @@ def assign_again(number,cpu_file_init,pre_calc_destfile_init):
 
 #-----------------------------------------------------------------------------------------    
 # the cpu_env is kind of USELESS
-cpu_env = '@ EIP=7c811185 CR3=0de44000 EAX=ffffffff EBX=0012aed0 ECX=0012ad18 EDX=00000040 ESI=074903d8 EDI=0012ad6c EBP=074903bc ESP=0012ad00 EFLAGS=00000246 FS_BASE=7ffdf000'
+cpu_env = '@ EIP=78b0379c CR3=0e11b000 EAX=78b52028 EBX=0434d4f0 ECX=0000000b EDX=008f0040 ESI=037004f8 EDI=78ab1ec6 EBP=0012abac ESP=0012ab88 EFLAGS=00000206 FS_BASE=7ffdf000'
 #-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------
@@ -145,19 +157,19 @@ cpu_env = '@ EIP=7c811185 CR3=0de44000 EAX=ffffffff EBX=0012aed0 ECX=0012ad18 ED
 # Initialize the file parameter
 
 #memory_file = "./qemu25/qemu25_mem_"+str(number-1)
-memory_file = "/home/cy/xp38_1.dmp"
+memory_file = "/home/cy/xp40_1.dmp"
 #memory_file = "./qemu25/qemu25_mem_"+'0'
 
-vmem_file = "/home/cy/xpv38_1.dmp"
+vmem_file = "/home/cy/xpv40_1.dmp"
 
-psscan_file = "/home/cy/psscan38"
-memmap_file = "/home/cy/memmap38_2"
+psscan_file = "/home/cy/psscan40"
+memmap_file = "/home/cy/memmap40_2"
 
 #cpu_file = "./qemu25/qemu25_cpu_part_"+str(number)
 #cpu_file = "./qemu19/qemu19_cpu_part_0"
 #cpu_file = "./qemu25/qemu25_cpu_part_0.log"
 
-hashfile = 'qemu38_de_duplicate.log'
+hashfile = 'qemu40_de_duplicate.log'
 
 #pre_calc_destfile = "./qemu21/qemu21_ins_"+str(number)+'_b'
 #pre_calc_destfile = "./qemu25/qemu25_ins_0"
@@ -165,19 +177,19 @@ hashfile = 'qemu38_de_duplicate.log'
 
 #save_mem_file = './qemu21/qemu21_mem_'+str(number)
 #save_mem_file = './qemu25/qemu25_mem_'+str(number)
-save_mem_file = './qemu38/qemu38_mem_final'
+save_mem_file = './qemu40/qemu40_mem_final'
 
-final_ins_file = "./qemu38/qemu38_ins_total2"
+final_ins_file = "./qemu40/qemu40_ins_total"
 
 # TOTAL_NUMBER (chunk_number): wc -l, use the beginning digit,usually,XXX: 100000 level
 TOTAL_NUMBER = 0
 
 print 'Cutting cpu file...'
 
-cpu_file_init = "./qemu38/qemu38_cpu_part_"
+cpu_file_init = "./qemu40/qemu40_cpu_part_"
 #cut_cpu_into_parts('qemu29_cpu.log', cpu_file_init, 100000, TOTAL_NUMBER)
-cut_cpu_into_parts('./qemu38/qemu38_rm_int.log', cpu_file_init, 100000, TOTAL_NUMBER)
-pre_calc_destfile_init = "./qemu38/qemu38_ins_"
+cut_cpu_into_parts('./qemu40/qemu40_rm_int.log', cpu_file_init, 100000, TOTAL_NUMBER)
+pre_calc_destfile_init = "./qemu40/qemu40_ins_"
 
 #disk = 
 #-----------------------------------------------------------------------------------------    
@@ -203,6 +215,10 @@ psscan_table = {}
 
 mem = []
 vmem = []
+
+flagdict = {}
+
+flagdict['$set_inhibit_irq'] = 0
 
 print 'Initializing memory...'
 
@@ -282,17 +298,55 @@ for number in xrange(0,TOTAL_NUMBER+1):
             get_cpu_env(text[line],reg)
             cr3 = text[line].split()[2].split('=')[1]
             if address in dict1:
-                tb = dict1[address]
-                tb2 = tb.split('\n')
-                tb2 = execute_all(tb2,reg,tmp,mem,memmap_table,cr3,vmem)
-                text.insert(line+1,tb2)
+                if len(dict1[address]) >= 2:
+                    #print '>=2'
+                    print address
+                    #print dict1[address][0]
+                    #print dict1[address][1]
+                    '''
+                    if len(dict1[address]) >= 3:
+                        print 'more than 3!'
+                        print address
+                    '''
+                    
+                    if flagdict['$set_inhibit_irq'] == 1:
+                        #print '$set_inhibit_irq'
+                        '''
+                        if len(dict1[address]) != 2:
+                            print 'sti length error!!!'
+                            print address
+                        '''
+                        if len(dict1[address][0]) < len(dict1[address][1]):
+                            tb = dict1[address][0]
+                        else:
+                            tb = dict1[address][1]
+                            
+                        tb2 = tb.split('\n')
+                        tb2 = execute_all(tb2,reg,tmp,mem,memmap_table,cr3,vmem,flagdict)
+                        text.insert(line+1,tb2)
+                        flagdict['$set_inhibit_irq'] = 0
+                        
+                    else:
+                        if len(dict1[address][0]) > len(dict1[address][1]):
+                            tb = dict1[address][0]
+                        else:
+                            tb = dict1[address][1]
+                        
+                        tb2 = tb.split('\n')
+                        tb2 = execute_all(tb2,reg,tmp,mem,memmap_table,cr3,vmem,flagdict)
+                        text.insert(line+1,tb2)
+                else:
+                    tb = dict1[address][0]
+                    tb2 = tb.split('\n')
+                    tb2 = execute_all(tb2,reg,tmp,mem,memmap_table,cr3,vmem,flagdict)
+                    text.insert(line+1,tb2)
             else:
                 print 'address NOT found in dict1'
         #b = time.time()
         #print '%.10f'%(b-a)
         #print text
         line += 1
-        if cpu_count % 10000 == 0:
+        if cpu_count % 1000 == 0:
             print cpu_count
     
     print 'Writing to ins file...'

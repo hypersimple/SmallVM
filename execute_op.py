@@ -1,37 +1,45 @@
 from mem_func import *
 
-#'''
-# starts with number
-def name(microop):
-    return microop.split()[2]
-def para1(microop):
-    return microop.split()[3].split(',')[0]
-def para2(microop):
-    return microop.split()[3].split(',')[1]
-def para3(microop):
-    return microop.split()[3].split(',')[2]
-def para4(microop):
-    return microop.split()[3].split(',')[3]
-def para5(microop):
-    return microop.split()[3].split(',')[4]
-#'''
+PARA_POSITION = 1
 
 
-'''
-# starts with #
-def name(microop):
-    return microop.split()[1]
-def para1(microop):
-    return microop.split()[2].split(',')[0]
-def para2(microop):
-    return microop.split()[2].split(',')[1]
-def para3(microop):
-    return microop.split()[2].split(',')[2]
-def para4(microop):
-    return microop.split()[2].split(',')[3]
-def para5(microop):
-    return microop.split()[2].split(',')[4]
-'''
+if PARA_POSITION == 1:
+    # starts with "#"
+    def name(microop):
+        return microop.split()[1]
+    def para1(microop):
+        return microop.split()[2].split(',')[0]
+    def para2(microop):
+        return microop.split()[2].split(',')[1]
+    def para3(microop):
+        return microop.split()[2].split(',')[2]
+    def para4(microop):
+        return microop.split()[2].split(',')[3]
+    def para5(microop):
+        return microop.split()[2].split(',')[4]
+    def paraw(microop):   # whole parameter
+        return microop.split()[2]
+
+
+
+if PARA_POSITION == 2:
+    # starts with number
+    def name(microop):
+        return microop.split()[2]
+    def para1(microop):
+        return microop.split()[3].split(',')[0]
+    def para2(microop):
+        return microop.split()[3].split(',')[1]
+    def para3(microop):
+        return microop.split()[3].split(',')[2]
+    def para4(microop):
+        return microop.split()[3].split(',')[3]
+    def para5(microop):
+        return microop.split()[3].split(',')[4]
+    def paraw(microop):   # whole parameter
+        return microop.split()[3]
+
+
 
 
 def memmap(virtual,cr3,memmap_table):
@@ -43,15 +51,15 @@ def memmap(virtual,cr3,memmap_table):
         return 0xdeadbeef
 
 
-def execute_op(microop,reg,tmp,mem,memmap_table,text,count,cr3,vmem):
+def execute_op(microop,reg,tmp,mem,memmap_table,text,count,cr3,vmem,flagdict):
 
 
-    PRINT_ERROR = 1
+    PRINT_ERROR = 0
     PRINT_OTHER_ERROR = 0
     PRINT_MEM_ERROR = 0
-    PRINT_UNDEFINED_ERROR = 1
+    PRINT_UNDEFINED_ERROR = 0
 
-
+    #print microop
 
     if name(microop) == "mov_i32":
         # mov_i32 tmp0,esi
@@ -695,8 +703,10 @@ def execute_op(microop,reg,tmp,mem,memmap_table,text,count,cr3,vmem):
             if env == 'env':
                 if constant.startswith('$0x84'):
                     reg[fs_base] = reg[src]
+                elif constant.startswith('$0x20'):
+                    pass
                 else:
-                    if PRINT_ERROR == 1:
+                    if PRINT_ERROR == 1:   #XXX 0, not 1
                         print microop
                      
             else:
@@ -710,16 +720,89 @@ def execute_op(microop,reg,tmp,mem,memmap_table,text,count,cr3,vmem):
                 pass
 
 
+    elif name(microop).startswith('movi_i64'):
+        src = para2(microop)
+        dst = para1(microop)
+        try:
+            #reg[dst] = int(src.split('x')[1],16)
+            if src.startswith('$sysenter'):  #sysexit is implemented outside the execution
+                reg['esp'] = 0xf896c000
+                
+            elif src.startswith('$sysexit'):
+                reg['esp'] = reg['ecx']
+                
+            elif src.startswith('$divl_EAX'):
+                temp = reg['edx']*0x100000000 + reg['eax']
+                temp1 = temp / reg['tmp0']
+                remainder = temp % reg['tmp0']
+                reg['eax'] = temp1
+                reg['edx'] = remainder
+                
+            elif src.startswith('$set_inhibit_irq'):
+                flagdict['$set_inhibit_irq'] = 1
+            
+            elif src.startswith('$reset_inhibit_irq'):
+                flagdict['$set_inhibit_irq'] = 0
+            
+            else:
+                reg[dst] = src
+                
+                if PRINT_ERROR == 1:
+                    print microop
+                else:
+                    pass
+        except:
+            if PRINT_ERROR == 1:
+                print microop
+            else:
+                pass
+
+    elif name(microop) == 'call':
+        cname = para1(microop)  # cname = callname
+        try:
+            if paraw(microop).startswith('tmp13,$0x0,$0,tmp12,tmp6'):  # load_seg
+                if reg['tmp6'] == 0x30:
+                    reg['fs_base'] = 0xffdff000
+                elif reg['tmp6'] == 0x3b:
+                    reg['fs_base'] = 0x7ffdf000
+                elif reg['tmp6'] == 0x23:
+                    pass
+                    # ds related, do nothing here
+            elif reg[cname] == '$bsf':
+                src = para5(microop)
+                dst = para4(microop)
+                bit = 0
+                while bit != 32:
+                    if (reg[src] >> bit) & 0x1:
+                        reg[dst] = bit
+                        break
+                    else:
+                        bit += 1
+            elif reg[cname] == '$bsr':
+                src = para5(microop)
+                dst = para4(microop)
+                bit = 0
+                while bit != 32:
+                    if (reg[src] << bit) & 0x80000000:
+                        reg[dst] = bit
+                        break
+                    else:
+                        bit += 1
+
+        except:
+            if PRINT_ERROR == 1:
+                print microop
+                raise
+            else:
+                pass
+                
+    elif name(microop) == 'exit_tb':
+        flagdict['exit_tb'] = 1
+
     elif name(microop).startswith('goto')\
-        or name(microop).startswith('st_')\
-        or name(microop).startswith('ld_')\
         or name(microop).startswith('exit')\
-        or name(microop).startswith('set_label')\
-        or name(microop).startswith('brcond')\
         or name(microop).startswith('nop')\
         or name(microop).startswith('discard')\
-        or name(microop).startswith('call')\
-        or name(microop).startswith('movi_i64')\
         or name(microop).startswith('end'):
         
         if PRINT_OTHER_ERROR == 1:

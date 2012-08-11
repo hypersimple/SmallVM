@@ -22,6 +22,10 @@ def de_deplicate(sourcefile,destfile):
                         text[line+subline] = ''
                     else:
                         break
+                        
+    for line in xrange(len(text)):
+        if text[line].startswith('# exit_tb'):
+            text[line] = '# exit_tb\n'
 
     f2 = open (destfile, "w") 
     for line2 in xrange(0,len(text)):

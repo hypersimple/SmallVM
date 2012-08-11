@@ -48,17 +48,31 @@ def destpara(microop):
         destset.append( microop.split()[2].split(',')[1].split('{')[0] )    
     
     
-    elif microop.split()[1] == "bswap32_i32" or \
-        \
+    elif microop.split()[1] == "bswap32_i32":
+
+        destset.append( microop.split()[2].split(',')[0] )
+        destset.append( microop.split()[2].split(',')[1] )
+
+
+    elif microop.split()[1].startswith('ext'):
+    
+        result = microop.split()[2].split(',')[0]
+        destset.append(result)
+        '''
         microop.split()[1] == "ext8s_i32" or \
         microop.split()[1] == "ext8s_i32" or \
         microop.split()[1] == "ext16s_i32" or \
         microop.split()[1] == "ext16u_i32" or \
         microop.split()[1] == "ext32s_i64" or \
         microop.split()[1] == "ext32u_i64" :
+        '''
         
-        destset.append( microop.split()[2].split(',')[0] )
-        destset.append( microop.split()[2].split(',')[1] )
+    elif microop.split()[1] == "call":
+    
+        if len(microop.split()[2].split(',')) == 5:
+            destset.append( microop.split()[2].split(',')[3] )
+        else:
+            destset.append("$Unknown_dest_para")
     
     else:
         destset.append("$Unknown_dest_para")
@@ -120,7 +134,14 @@ def srcpara(microop):
         microop.split()[1] == "shr_i32" or \
         microop.split()[1] == "sar_i32" or \
         microop.split()[1] == "rotl_i32" or \
-        microop.split()[1] == "rotr_i32" :
+        microop.split()[1] == "rotr_i32" or \
+        microop.split()[1] == "and_i64" or \
+        microop.split()[1] == "or_i64" or \
+        microop.split()[1] == "xor_i64" or \
+        microop.split()[1] == "shl_i64" or \
+        microop.split()[1] == "shr_i64" or \
+        microop.split()[1] == "sar_i64" or \
+        microop.split()[1] == "rotl_i64":
         
         #microop.split()[1] == "deposit_i32" :
         
@@ -133,14 +154,7 @@ def srcpara(microop):
             srcset.append(result)
             
         
-    elif microop.split()[1] == "bswap32_i32" or \
-        \
-        microop.split()[1] == "ext8s_i32" or \
-        microop.split()[1] == "ext8s_i32" or \
-        microop.split()[1] == "ext16s_i32" or \
-        microop.split()[1] == "ext16u_i32" or \
-        microop.split()[1] == "ext32s_i64" or \
-        microop.split()[1] == "ext32u_i64" :
+    elif microop.split()[1] == "bswap32_i32":
         
         result = microop.split()[2].split(',')[0]
         if not result.startswith('$'):
@@ -155,7 +169,30 @@ def srcpara(microop):
         result = microop.split()[2].split(',')[2]
         if not result.startswith('$'):
             srcset.append(result)
-        
+            
+            
+    elif microop.split()[1].startswith('ext'):
+    
+        result = microop.split()[2].split(',')[1]
+        if not result.startswith('$'):
+            srcset.append(result)
+        '''
+        microop.split()[1] == "ext8s_i32" or \
+        microop.split()[1] == "ext8s_i32" or \
+        microop.split()[1] == "ext16s_i32" or \
+        microop.split()[1] == "ext16u_i32" or \
+        microop.split()[1] == "ext32s_i64" or \
+        microop.split()[1] == "ext32u_i64" :
+        '''
+            
+    elif microop.split()[1] == "call":
+        if len(microop.split()[2].split(',')) == 5:
+            srcset.append( microop.split()[2].split(',')[4] )
+        elif len(microop.split()[2].split(',')) == 4:
+            srcset.append( microop.split()[2].split(',')[3] )
+        else:
+            srcset.append("$Unknown_src_para")
+
     else:
         srcset.append("$Unknown_src_para")
         

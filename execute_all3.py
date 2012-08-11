@@ -16,24 +16,158 @@ def get_reg_state(reg):
 def get_tmp_state(reg):
     return '@ TMP0=%08x'%reg['tmp0']+' TMP1=%08x'%reg['tmp1']+' TMP2=%08x'%reg['tmp2']+' TMP4=%08x'%reg['tmp4']+' TMP6=%08x'%reg['tmp6']+' TMP12=%08x'%reg['tmp12']+' TMP13=%08x'%reg['tmp13']+' TMP14=%08x'%reg['tmp14']
 
-def execute_all(text,reg,tmp,mem,memmap_table,cr3,vmem):
+def execute_all(text,reg,tmp,mem,memmap_table,cr3,vmem,flagdict):
     count = 0
-    for microop in text:
-        if microop.startswith('@'):
-            get_cpu_env(microop,reg)
-        # XXX
-        #if microop.startswith('#'):
-        #text.insert(count, get_tmp_state(tmp))
-        #text.insert(count, get_reg_state(reg))
-        #text2.append(get_reg_state(reg)+'\n')
-        #text2.append(get_tmp_state(reg)+'\n')
-        if microop.startswith('#'):
-            execute_op(microop,reg,tmp,mem,memmap_table,text,count,cr3,vmem)
-        
-        #text2.append('\n'+text[count]+'\n')
-        
-        count += 1
-        #print count
+    
+    while count < len(text):
+        if text[count].startswith('#'):
+            microop = text[count]
+            
+            
+            if name(microop) == ('brcond_i32'):
+                p1 = para1(microop)
+                p2 = para2(microop)
+                cond = para3(microop)
+                label = para4(microop)
+                
+                if cond == 'eq': # equal
+                    if reg[p1] == reg[p2]:
+                        while(not (name(text[count])=='set_label' \
+                        and para1(text[count])==label ) ):
+                            count += 1
+                            
+                elif cond == 'ne': # not equal
+                    if reg[p1] != reg[p2]:
+                        while(not (name(text[count])=='set_label' \
+                        and para1(text[count])==label ) ):
+                            count += 1
+                            
+                elif cond == 'lt': # less than
+                    # all positive
+                    if not ((0x80000000&reg[p1]) or (0x80000000&reg[p2])):
+                        if reg[p1] < reg[p2]:
+                            while(not (name(text[count])=='set_label' \
+                            and para1(text[count])==label ) ):
+                                count += 1
+                    # p1 is negative and p2 is positive
+                    elif (0x80000000&reg[p1]) and (not (0x80000000&reg[p2])):
+                        while(not (name(text[count])=='set_label' \
+                            and para1(text[count])==label ) ):
+                                count += 1
+                    # all negative
+                    elif (0x80000000&reg[p1]) and (0x80000000&reg[p2]):
+                        if reg[p1] > reg[p2]:
+                            while(not (name(text[count])=='set_label' \
+                            and para1(text[count])==label ) ):
+                                count += 1
+                    
+                elif cond == 'le':
+                    # all positive
+                    if not ((0x80000000&reg[p1]) or (0x80000000&reg[p2])):
+                        if reg[p1] < reg[p2]:
+                            while(not (name(text[count])=='set_label' \
+                            and para1(text[count])==label ) ):
+                                count += 1
+                    # p1 is negative and p2 is positive
+                    elif (0x80000000&reg[p1]) and (not (0x80000000&reg[p2])):
+                        while(not (name(text[count])=='set_label' \
+                            and para1(text[count])==label ) ):
+                                count += 1
+                    # all negative
+                    elif (0x80000000&reg[p1]) and (0x80000000&reg[p2]):
+                        if reg[p1] > reg[p2]:
+                            while(not (name(text[count])=='set_label' \
+                            and para1(text[count])==label ) ):
+                                count += 1
+                    # equal
+                    elif reg[p1] == reg[p2]:
+                        while(not (name(text[count])=='set_label' \
+                            and para1(text[count])==label ) ):
+                                count += 1
+                    
+                elif cond == 'gt':
+                    # all positive
+                    if not ((0x80000000&reg[p1]) or (0x80000000&reg[p2])):
+                        if reg[p1] > reg[p2]:
+                            while(not (name(text[count])=='set_label' \
+                            and para1(text[count])==label ) ):
+                                count += 1
+                    # p1 is positive and p2 is negative
+                    elif (not (0x80000000&reg[p1])) and (0x80000000&reg[p2]):
+                        while(not (name(text[count])=='set_label' \
+                            and para1(text[count])==label ) ):
+                                count += 1
+                    # all negative
+                    elif (0x80000000&reg[p1]) and (0x80000000&reg[p2]):
+                        if reg[p1] < reg[p2]:
+                            while(not (name(text[count])=='set_label' \
+                            and para1(text[count])==label ) ):
+                                count += 1
+                                
+                elif cond == 'ge':
+                    # all positive
+                    if not ((0x80000000&reg[p1]) or (0x80000000&reg[p2])):
+                        if reg[p1] > reg[p2]:
+                            while(not (name(text[count])=='set_label' \
+                            and para1(text[count])==label ) ):
+                                count += 1
+                    # p1 is positive and p2 is negative
+                    elif (not (0x80000000&reg[p1])) and (0x80000000&reg[p2]):
+                        while(not (name(text[count])=='set_label' \
+                            and para1(text[count])==label ) ):
+                                count += 1
+                    # all negative
+                    elif (0x80000000&reg[p1]) and (0x80000000&reg[p2]):
+                        if reg[p1] < reg[p2]:
+                            while(not (name(text[count])=='set_label' \
+                            and para1(text[count])==label ) ):
+                                count += 1
+                    # equal
+                    elif reg[p1] == reg[p2]:
+                        while(not (name(text[count])=='set_label' \
+                            and para1(text[count])==label ) ):
+                                count += 1
+                                
+                elif cond == 'ltu':
+                    if reg[p1] < reg[p2]:
+                        while(not (name(text[count])=='set_label' \
+                        and para1(text[count])==label ) ):
+                            count += 1
+                                
+                elif cond == 'leu':
+                    if reg[p1] <= reg[p2]:
+                        while(not (name(text[count])=='set_label' \
+                        and para1(text[count])==label ) ):
+                            count += 1
+                            
+                elif cond == 'gtu':
+                    if reg[p1] > reg[p2]:
+                        while(not (name(text[count])=='set_label' \
+                        and para1(text[count])==label ) ):
+                            count += 1
+                            
+                elif cond == 'geu':
+                    if reg[p1] >= reg[p2]:
+                        while(not (name(text[count])=='set_label' \
+                        and para1(text[count])==label ) ):
+                            count += 1
+                            
+                else:
+                    print microop
+            
+            
+            '''
+            if microop.startswith('# brcond_i32 tmp4,tmp12,ne,$0x0'):
+                if text[count+1].startswith('# set_label $0x1'):
+                    if reg['ecx'] == 0:
+                        break
+            '''
+                    
+            execute_op(microop,reg,tmp,mem,memmap_table,text,count,cr3,vmem,flagdict)
+            count += 1
+        else:
+            count += 1
+
     string = ''
     for i in text:
         string += i+'\n'
