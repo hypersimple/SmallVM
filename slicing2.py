@@ -31,7 +31,7 @@ def slicing(instr_line, microop,slice_set,instruction_list):
 
 
 
-DataSource = "./qemu40/qemu40_ins_total"
+DataSource = "./qemu019/qemu019_ins_total"
 
 f = open(DataSource, "r")
 text = f.readlines()  #Text is a string array
@@ -52,7 +52,7 @@ slice_set = set(init_list)
 #line = 312408 - 1
 #line = 806670 - 1        # Set the interested line; 0x7e43b6d6; the destination para
 #line = len(text) -1
-line = 735771 - 1
+line = 199966 - 1
 
 first_cpu = 1
 for subline in xrange(0,line+1):
@@ -66,8 +66,8 @@ for subline in xrange(0,line+1):
             instruction_list.append('-----------------------------------------------------------------------\n')
             first_cpu = 0
 
-
-f2 = open("./qemu40/qemu40_slicing_tmp.log","w")
+'''
+f2 = open("./qemu020/qemu020_slicing_tmp.log","w")
 
 i = len(instruction_list)-1
 while(i != -1):
@@ -75,6 +75,7 @@ while(i != -1):
     f2.write(instruction_list[i])
     i -= 1
 f2.close()
+'''
 
 print 'slice_set:'
 print slice_set

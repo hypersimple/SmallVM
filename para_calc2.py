@@ -34,7 +34,8 @@ def destpara(microop):
         microop.split()[1] == "rotl_i32" or \
         microop.split()[1] == "rotr_i32" or \
         \
-        microop.split()[1] == "deposit_i32" :
+        microop.split()[1] == "deposit_i32" or \
+        microop.split()[1] == "ld_i32":
        
         destset.append( microop.split()[2].split(',')[0] )
     
@@ -184,7 +185,17 @@ def srcpara(microop):
         microop.split()[1] == "ext32s_i64" or \
         microop.split()[1] == "ext32u_i64" :
         '''
-            
+    
+    elif microop.split()[1] == "st_i32" :
+    
+        result = microop.split()[2].split(',')[0]
+        if not result.startswith('$'):
+            srcset.append(result)
+    
+    elif microop.split()[1] == "ld_i32":
+        result = microop.split()[2]
+        srcset.append(result)
+    
     elif microop.split()[1] == "call":
         if len(microop.split()[2].split(',')) == 5:
             srcset.append( microop.split()[2].split(',')[4] )

@@ -23,6 +23,7 @@ def slicing(instr_line_0, microop,slice_set,instr_list,tmp2_dict):
         if microop.startswith('# qemu_ld'):
             address2 = microop.split()[2].split(',')[1].split('{')[0]
             tmp2_dict[address2] = instr_line_0
+            
         print '#'+str(instr_line_0+1)+' '+microop
         #print microop
     return (slice_set, instr_list)         # return a tuple
@@ -30,16 +31,22 @@ def slicing(instr_line_0, microop,slice_set,instr_list,tmp2_dict):
 
 def do_slicing(text,init_line_0,slice_set,instr_list,tmp2_dict):
     for subline in xrange(0,init_line_0 + 1):
-        if len(slice_set) == 0:
-            break
-        if text[init_line_0-subline].startswith('#'):
+
+        microop = text[init_line_0-subline]
+        if microop.startswith('# brcond_i32'):
+            para1 = microop.split()[2].split(',')[0]
+            para2 = microop.split()[2].split(',')[1]
+            slice_set.add(para1)
+            slice_set.add(para2)
+            print '#'+str(init_line_0-subline+1)+' '+microop
+        elif text[init_line_0-subline].startswith('#'):
             (slice_set, instr_list) = slicing(init_line_0-subline, text[init_line_0-subline], slice_set,instr_list,tmp2_dict)
             
     return (slice_set, instr_list)
 
 
 #DataSource = "./qemu019/qemu019_ins_total"
-DataSource = "./qemu019/qemu019_ins_total"
+DataSource = "./qemu40/qemu40_ins_total"
 
 f = open(DataSource, "r")
 text = f.readlines()
@@ -57,22 +64,22 @@ slice_history = set(temp1)
 
 
 #init_list.append('eax')    # The destination parameter, and the line as the same
-init_list.append('tmp0')
+#init_list.append('tmp0')
 
 slice_set = set(init_list)
 
 #slice_list.append( (723307 - 1,'tmp0') )
 #slice_list.append( (735355 - 1,'tmp0') )
-slice_list.append( (199966 - 1,'tmp0') )
+
 
 #line = 806670 - 1        # Set the interested line; 0x7e43b6d6; the destination para
 
 
 #init_line_0 = 2287609 - 1   # 019  ,67 google
-#init_line_0 = 735355 - 1   #40
+init_line_0 = 735355 - 1   #40
 #init_line_0 = 2286379 - 1   # 019 , 69  info
-#init_line_0 = 721763 - 1  #38
-init_line_0 = 199966 - 1  #020 69 info
+
+     
 
 
 
@@ -89,33 +96,14 @@ for j in xrange(0,44162):
 #--
 '''
 
-while(len(slice_list)!=0):
+while(1):
+#while(len(slice_list)!=0):
     print ''
     print '-------------------------------------------------'
     print 'stage: ' + str(stage)
     print '-------------------------------------------------'
     print ''
     
-    if stage == 0:
-        slice_list.pop(0)
-    else:
-        last_line_0 = slice_list.pop(0)[0]
-        
-        print 'last_line_0: ' + str(last_line_0)
-        
-        i = 1
-        while (1):
-            if text[last_line_0-i].startswith('#'):
-                if 'tmp2' in set(destpara(text[last_line_0-i])):
-                    last_tmp2_line = last_line_0-i
-                    break
-            i += 1
-
-        init_line_0 = last_tmp2_line
-        slice_set.clear()
-        slice_set.add('tmp2')
-
-        print 'last_tmp2_line: ' + str(last_tmp2_line)
     
     (slice_set, instr_list) = do_slicing(text,init_line_0,slice_set,instr_list,tmp2_dict)
 

@@ -204,8 +204,13 @@ def execute_op(microop,reg,tmp,mem,memmap_table,text,count,cr3,vmem,flagdict):
                 except:
                     print 'qemu_st vir error: '+'%x'%loc_vir+ ' '+cr3
                     
-            
-            text[count] = text[count].replace('tmp2','*0x'+'%x'%loc_vir+'{' + '0x%x'%data + '}')
+            try:
+                text[count] = text[count].replace('tmp2','*0x'+'%x'%loc_vir+'{' + '0x%x'%data + '}')
+            except:
+                print 'qemu_st replace tmp2 error!!!!!!!!!!!!!!!!!!!!!!'
+                print 'line: ' + str(count+1)
+                print text[count]
+                
             
             '''
             text[count] = '# ' + name_op + ' ' + src\

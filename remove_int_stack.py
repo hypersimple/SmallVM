@@ -9,7 +9,7 @@ def remove_int(sourcefile,destfile):
     int_count = 0
     while(count<=len(text)-1):
         try:
-            if text[count].split()[1].startswith('v='):
+            if text[count].split()[1].startswith('v=') and text[count].split()[3] == 'i=0':
                 #print text[count].split()[0]
                 int_count += 1
                 print '----------------------------------------------------'
@@ -66,4 +66,4 @@ def remove_int(sourcefile,destfile):
     f2.close()
     
 #remove_int("test_rm_int1.txt","test_rm_int_result.txt")
-remove_int("./qemu40/qemu40_cpu.log","./qemu40/qemu40_rm_int.log")
+remove_int("./qemu019_3/qemu019_3_cpu.log","./qemu019_3/qemu019_3_rm_int.log")

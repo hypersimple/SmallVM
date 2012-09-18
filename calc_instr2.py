@@ -157,12 +157,12 @@ cpu_env = '@ EIP=78b0379c CR3=0e11b000 EAX=78b52028 EBX=0434d4f0 ECX=0000000b ED
 # Initialize the file parameter
 
 #memory_file = "./qemu25/qemu25_mem_"+str(number-1)
-memory_file = "/home/cy/xp019_2.dmp"
+memory_file = "/home/cy/xp020_1.dmp"
 #memory_file = "./qemu25/qemu25_mem_"+'0'
 
-vmem_file = "/home/cy/xpv020_2.dmp"
+vmem_file = "/home/cy/xpv020_1.dmp"
 
-psscan_file = "/home/cy/psscan_tmp"
+psscan_file = "/home/cy/psscan020"
 memmap_file = "/home/cy/memmap020_2"
 
 #cpu_file = "./qemu25/qemu25_cpu_part_"+str(number)
@@ -179,7 +179,7 @@ hashfile = 'qemu020_de_duplicate.log'
 #save_mem_file = './qemu25/qemu25_mem_'+str(number)
 save_mem_file = './qemu020/qemu020_mem_final'
 
-final_ins_file = "./qemu020/qemu020_ins_total2"
+final_ins_file = "./qemu020/qemu020_ins_total"
 
 # TOTAL_NUMBER (chunk_number): wc -l, use the beginning digit,usually,XXX: 10000 level
 TOTAL_NUMBER = 35
@@ -298,48 +298,10 @@ for number in xrange(0,TOTAL_NUMBER+1):
             get_cpu_env(text[line],reg)
             cr3 = text[line].split()[2].split('=')[1]
             if address in dict1:
-                if len(dict1[address]) >= 2:
-                    #print '>=2'
-                    print address
-                    #print dict1[address][0]
-                    #print dict1[address][1]
-                    '''
-                    if len(dict1[address]) >= 3:
-                        print 'more than 3!'
-                        print address
-                    '''
-                    
-                    if flagdict['$set_inhibit_irq'] == 1:
-                        #print '$set_inhibit_irq'
-                        '''
-                        if len(dict1[address]) != 2:
-                            print 'sti length error!!!'
-                            print address
-                        '''
-                        if len(dict1[address][0]) < len(dict1[address][1]):
-                            tb = dict1[address][0]
-                        else:
-                            tb = dict1[address][1]
-                            
-                        tb2 = tb.split('\n')
-                        tb2 = execute_all(tb2,reg,tmp,mem,memmap_table,cr3,vmem,flagdict)
-                        text.insert(line+1,tb2)
-                        flagdict['$set_inhibit_irq'] = 0
-                        
-                    else:
-                        if len(dict1[address][0]) > len(dict1[address][1]):
-                            tb = dict1[address][0]
-                        else:
-                            tb = dict1[address][1]
-                        
-                        tb2 = tb.split('\n')
-                        tb2 = execute_all(tb2,reg,tmp,mem,memmap_table,cr3,vmem,flagdict)
-                        text.insert(line+1,tb2)
-                else:
-                    tb = dict1[address][0]
-                    tb2 = tb.split('\n')
-                    tb2 = execute_all(tb2,reg,tmp,mem,memmap_table,cr3,vmem,flagdict)
-                    text.insert(line+1,tb2)
+                tb = dict1[address][0]
+                tb2 = tb.split('\n')
+                tb2 = execute_all(tb2,reg,tmp,mem,memmap_table,cr3,vmem,flagdict)
+                text.insert(line+1,tb2)
             else:
                 print 'address NOT found in dict1'
         #b = time.time()
