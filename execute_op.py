@@ -1,5 +1,6 @@
 from mem_func import *
 
+#XXX
 PARA_POSITION = 1
 
 
@@ -210,6 +211,11 @@ def execute_op(microop,reg,tmp,mem,memmap_table,text,count,cr3,vmem,flagdict):
                 print 'qemu_st replace tmp2 error!!!!!!!!!!!!!!!!!!!!!!'
                 print 'line: ' + str(count+1)
                 print text[count]
+                
+                #debug
+                #print 'data:',data
+                #print 'loc_vir:',loc_vir
+                #raise
                 
             
             '''
@@ -750,7 +756,7 @@ def execute_op(microop,reg,tmp,mem,memmap_table,text,count,cr3,vmem,flagdict):
                 flagdict['$set_inhibit_irq'] = 0
             
             else:
-                reg[dst] = src
+                reg[dst] = int(src.split('x')[1],16)
                 
                 if PRINT_ERROR == 1:
                     print microop

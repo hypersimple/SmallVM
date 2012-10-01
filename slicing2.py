@@ -31,7 +31,7 @@ def slicing(instr_line, microop,slice_set,instruction_list):
 
 
 
-DataSource = "./qemu019/qemu019_ins_total"
+DataSource = "./qemu019_5/qemu019_5_ins2.log"
 
 f = open(DataSource, "r")
 text = f.readlines()  #Text is a string array
@@ -52,7 +52,7 @@ slice_set = set(init_list)
 #line = 312408 - 1
 #line = 806670 - 1        # Set the interested line; 0x7e43b6d6; the destination para
 #line = len(text) -1
-line = 199966 - 1
+line = 971808 - 1
 
 first_cpu = 1
 for subline in xrange(0,line+1):

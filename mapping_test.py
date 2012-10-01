@@ -14,7 +14,7 @@ index = backmapping(text)
 
 index2 = mapping(text)
 
-print index[245]
-print index[254]
+#print index[245]
+print index[17349740]
 
-print index2[6]
+#print index2[6]

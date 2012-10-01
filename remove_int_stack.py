@@ -7,9 +7,15 @@ def remove_int(sourcefile,destfile):
     text2 = []
     count = 0
     int_count = 0
+    
+    
+    while( not text[count].startswith('@') ):
+        count += 1
+    
+    
     while(count<=len(text)-1):
         try:
-            if text[count].split()[1].startswith('v=') and text[count].split()[3] == 'i=0':
+            if text[count].startswith('INT') and text[count].split()[4] == 'i=0':
                 #print text[count].split()[0]
                 int_count += 1
                 print '----------------------------------------------------'
@@ -55,6 +61,7 @@ def remove_int(sourcefile,destfile):
                         count1 += 1
                         #print text2[line]
                         text2[line+subline] = ''
+                        print line+subline
                     else:
                         break
     print 'de_duplicate count: ' + str(count1)
@@ -66,4 +73,4 @@ def remove_int(sourcefile,destfile):
     f2.close()
     
 #remove_int("test_rm_int1.txt","test_rm_int_result.txt")
-remove_int("./qemu019_3/qemu019_3_cpu.log","./qemu019_3/qemu019_3_rm_int.log")
+remove_int("./qemu019_5/qemu019_5_cpu.log","./qemu019_5/qemu019_5_rm_int.log")

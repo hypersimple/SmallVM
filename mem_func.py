@@ -26,6 +26,7 @@ def qemu_st32_vmem(vmem, loc_vir, data):   #data, memory, memory location
     except:
         print 'qemu_st32_vmem error,loc_vir: '+'%x'%loc_vir
         #pass
+        #raise
         
 
 def qemu_st16_mem(mem, loc, data):
