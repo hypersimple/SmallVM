@@ -1,1 +1,1 @@
-QEMU micro-op interpreter, like a small virtual machine, interpret from an initial memory dump and CPU registers dump.
+QEMU micro-op interpreter, like a small virtual machine, interpret from an initial memory dump and CPU registers' dump.
