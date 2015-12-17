@@ -1,1 +1,4 @@
 QEMU micro-op interpreter, like a small virtual machine, interpret from an initial memory dump and CPU registers' dump.
+
+How to run:
+Configure the parameters in "execute.py", and run it.
