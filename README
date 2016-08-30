@@ -1,3 +1,5 @@
+# The files are in an UGLY, flat hierarchy. Too lazy to organize them into folders.
+
 QEMU micro-op interpreter, like a small virtual machine, interpret from an initial memory dump and CPU registers' dump.
 
 How to run:
